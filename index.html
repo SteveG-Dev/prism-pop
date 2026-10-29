@@ -9,6 +9,8 @@
 <meta property="og:title" content="Prism Pop">
 <meta property="og:description" content="Drop blocks, clear lines, chain bombs and lightning. Can you beat today's Daily Puzzle?">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://steveg-dev.github.io/prism-pop/covers/cover-1920x1080.png">
+<meta name="twitter:image" content="https://steveg-dev.github.io/prism-pop/covers/cover-1920x1080.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0b1e'/%3E%3Crect x='10' y='10' width='20' height='20' rx='5' fill='%23ff4d6d'/%3E%3Crect x='34' y='10' width='20' height='20' rx='5' fill='%23ffb703'/%3E%3Crect x='10' y='34' width='20' height='20' rx='5' fill='%234cc9f0'/%3E%3Crect x='34' y='34' width='20' height='20' rx='5' fill='%2380ed99'/%3E%3C/svg%3E">
 <style>
   :root{ --bg:#0d0b1e; --panel:rgba(22,19,48,.95); --line:rgba(255,255,255,.12); --text:#f7f5ff; --muted:#a9a3cc; --gold:#ffd166; --mint:#80ed99; }
@@ -95,19 +97,83 @@
 <script>
 (() => {
 'use strict';
+const COVER = /[?&]cover\b/.test(location.search);   // ?cover: marketing captures with no on-screen text (portals allow only the title)
 
-/* ================= Portal / ads adapter (same contract as our other games) ================= */
-const Portal = {
-  gameplayStart(){}, gameplayStop(){},
-  rewarded(){ return fakeAd(); },
-  interstitial(){ return fakeAd(); },
-};
-function fakeAd(){
-  return new Promise(res => {
-    const el = $('ad'), n = $('adN'); let s = 3; n.textContent = s; el.classList.add('on');
-    const iv = setInterval(() => { s--; n.textContent = s; if (s <= 0){ clearInterval(iv); el.classList.remove('on'); res(true); } }, 1000);
+/* ================= Portal / ads adapter =================
+   One block, identical in every game (source: Game Studio/_shared/portal.js).
+   On CrazyGames it loads their SDK v3 and sends ads and gameplay events through it.
+   Anywhere else there is no ad network: rewards are granted straight away and
+   between-game ads are skipped. Add ?adtest to a URL to see a 3-second placeholder
+   where an ad would play; add ?cg on localhost to run the real SDK in its local mode. */
+const Portal = (() => {
+  const q = location.search;
+  const onPortal = /(^|\.)crazygames\.[a-z.]+$/i.test(location.hostname) || /[?&]cg\b/.test(q);
+  const adTest = /[?&]adtest\b/.test(q);
+  let sdk = null, siteMuted = false, adPlaying = false, playing = false;
+
+  // keep a handle on every AudioContext the game creates, so sound can pause for ads and the site's mute switch
+  const contexts = [], applyAudio = () => { for (const c of contexts){ try { (siteMuted || adPlaying) ? c.suspend() : c.resume(); } catch(e){} } };
+  const NativeAC = window.AudioContext || window.webkitAudioContext;
+  if (NativeAC){
+    const Tracked = function(...args){ const c = new NativeAC(...args); contexts.push(c); if (siteMuted || adPlaying) c.suspend(); return c; };
+    Tracked.prototype = NativeAC.prototype;
+    window.AudioContext = Tracked; if (window.webkitAudioContext) window.webkitAudioContext = Tracked;
+  }
+
+  const ready = !onPortal ? Promise.resolve() : new Promise(done => {
+    const s = document.createElement('script');
+    s.src = 'https://sdk.crazygames.com/crazygames-sdk-v3.js';
+    s.onload = async () => {
+      try {
+        await window.CrazyGames.SDK.init(); sdk = window.CrazyGames.SDK;
+        const onSettings = st => { siteMuted = !!(st && st.muteAudio); applyAudio(); };
+        onSettings(sdk.game.settings); sdk.game.addSettingsChangeListener(onSettings);
+        if (playing) sdk.game.gameplayStart();
+      } catch(e){ sdk = null; }
+      done();
+    };
+    s.onerror = () => done();          // an ad blocker can stop the SDK loading; the game still has to work
+    document.head.appendChild(s);
   });
-}
+
+  function placeholder(){
+    return new Promise(res => {
+      adPlaying = true; applyAudio();
+      const el = document.getElementById('ad'), n = document.getElementById('adN'); let s = 3; n.textContent = s; el.classList.add('on');
+      const iv = setInterval(() => { s--; n.textContent = s; if (s <= 0){ clearInterval(iv); el.classList.remove('on'); adPlaying = false; applyAudio(); res(true); } }, 1000);
+    });
+  }
+  function gameplayStart(){ if (playing) return; playing = true; if (sdk) try { sdk.game.gameplayStart(); } catch(e){} }
+  function gameplayStop(){ if (!playing) return; playing = false; if (sdk) try { sdk.game.gameplayStop(); } catch(e){} }
+  // resolves true only when the player earned the reward
+  function requestAd(type){
+    return new Promise(async res => {
+      await ready;
+      if (!sdk){
+        if (adTest) return placeholder().then(res);
+        // off-portal there is no ad to watch, so the reward is free; on CrazyGames with no SDK (ad blocker) there is no reward
+        return res(type !== 'rewarded' || !onPortal);
+      }
+      const wasPlaying = playing; gameplayStop();
+      // after the ad, put gameplay back the way it was (the game itself restarts it after a revive)
+      const done = ok => { adPlaying = false; applyAudio(); if (wasPlaying) gameplayStart(); res(ok); };
+      try {
+        sdk.ad.requestAd(type === 'rewarded' ? 'rewarded' : 'midgame', {
+          adStarted(){ adPlaying = true; applyAudio(); },
+          adFinished(){ done(true); },
+          adError(){ done(false); },       // never reward a failed ad
+        });
+      } catch(e){ done(false); }
+    });
+  }
+  return {
+    onPortal,
+    rewarded: () => requestAd('rewarded'),
+    interstitial: () => requestAd('midgame'),
+    gameplayStart, gameplayStop,
+    happytime(){ if (sdk) try { sdk.game.happytime(); } catch(e){} },
+  };
+})();
 
 /* ================= Helpers ================= */
 const $ = id => document.getElementById(id);
@@ -401,10 +467,12 @@ function draw(dt){
   // header
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
   G.shown += (G.score - G.shown) * Math.min(1, dt * 10); if (Math.abs(G.score - G.shown) < 1) G.shown = G.score;
+  if (!COVER){
   ctx.font = `900 ${Math.round(Math.min(46, VW / 9))}px ui-rounded,system-ui,sans-serif`; ctx.fillText(fmt(Math.round(G.shown)), VW / 2, by - 50);
   ctx.font = '800 13px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = '#a9a3cc';
   ctx.fillText(G.daily ? `DAILY PUZZLE #${dailyNumber()}` : `BEST ${fmt(Math.max(save.best, G.score))}`, VW / 2, by - 18);
   if (G.combo >= 2){ ctx.textAlign = 'right'; ctx.fillStyle = '#80ed99'; ctx.font = '900 15px ui-rounded,system-ui,sans-serif'; ctx.fillText(`COMBO ×${G.combo}`, bx + size, by - 18); }
+  }
 
   // board
   rr(bx - 8, by - 8, size + 16, size + 16, 16); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fill();
@@ -500,8 +568,9 @@ function show(id){
 }
 function refreshSwap(){
   if (!G) return;
-  $('swapBtn').textContent = G.freeSwap ? '🔄 Swap pieces (free)' : '🔄 Swap pieces · ad';
-  $('swapBtn').className = G.freeSwap ? '' : 'ad';
+  // one free swap per game; portals don't allow ad buttons on the play screen, so it simply goes away once used
+  $('swapBtn').textContent = '🔄 Swap pieces (1 free)';
+  $('swapBtn').style.display = G.freeSwap ? '' : 'none';
 }
 function refreshMenu(){
   $('mBest').textContent = fmt(save.best); $('mGems').textContent = fmt(save.gems);
@@ -548,12 +617,12 @@ async function revive(){
 }
 async function swap(){
   if (!G || G.over || screen !== 'play') return;
-  if (!G.freeSwap && !(await Portal.rewarded())) return;
+  if (!G.freeSwap) return;
   G.freeSwap = false; refill(); refreshSwap(); Sound.pick();
 }
 async function share(){
   const r = save.daily[dayKey()]; if (!r) return;
-  const url = /^https?:/.test(location.href) ? '\n' + location.origin + location.pathname : '';
+  const url = !Portal.onPortal && /^https?:/.test(location.href) ? '\n' + location.origin + location.pathname : '';
   const text = `Prism Pop · Daily Puzzle #${dailyNumber()}\n⭐ ${fmt(r.score)} · ${r.lines} lines · ${r.flushes} flush${r.flushes === 1 ? '' : 'es'} · combo ×${r.combo}${r.log ? '\n' + r.log : ''}${url}`;
   try { if (navigator.share){ await navigator.share({ text }); return; } } catch(e){ if (e && e.name === 'AbortError') return; }
   try { await navigator.clipboard.writeText(text); toast('Copied. Paste it anywhere'); } catch(e){ prompt('Copy your result:', text); }
@@ -597,7 +666,7 @@ $('muteBtn').onclick = () => { save.muted = !save.muted; persist(); Sound.setMut
 let last = performance.now();
 function frame(t){
   requestAnimationFrame(frame);                 // schedule first, so one bad frame can never freeze the game
-  const dt = Math.min((t - last) / 1000, 1 / 20); last = t;
+  const dt = Math.max(0, Math.min((t - last) / 1000, 1 / 20)); last = t;   // never negative
   try { draw(dt); } catch(err){ drag = null; ctx.setTransform(1, 0, 0, 1, 0, 0); }
 }
 refreshMenu(); requestAnimationFrame(frame);

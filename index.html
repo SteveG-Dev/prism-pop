@@ -306,7 +306,8 @@ const Sound = (() => {
   return {
     init, setMuted(m){ if (master) master.gain.value = m ? 0 : .5; },
     pick(){ if (ok()) note(660, 'sine', .05, .06); },
-    place(){ if (ok()) { note(220, 'triangle', .12, .09, 0, .7); hiss(.06, .05, 1800); } },
+    place(){ if (ok()) { note(220, 'triangle', .12, .09, 0, .7); hiss(.06, .05, 1800); note(1900, 'square', .025, .018); } },
+    beat(){ if (ok()){ note(70, 'sine', .35, .16, 0, .6); note(62, 'sine', .3, .2, .19, .6); } },
     bad(){ if (ok()) note(160, 'sawtooth', .05, .12, 0, .8); },
     clear(lines, combo){
       if (!ok()) return;
@@ -344,12 +345,20 @@ const SKINS = [
   { id: 'gem',    name: 'Gem',    cost: 300 },
 ];
 
+// a short phone buzz, only once the player has touched the page (browsers block it otherwise)
+const buzz = ms => { try { if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(ms); } catch(e){} };
+// first-time players get a few hints; anyone who has played before is treated as returning
+if (save.tut === undefined){ save.tut = (save.games || save.best) ? 'done' : 'new'; persist(); }
+const tutOn = () => save.tut === 'new';
+function tipDone(k){ save['tip_' + k] = 1; if (save.tip_drag && save.tip_special && save.tip_flush) save.tut = 'done'; persist(); }
+
 /* ================= Game state ================= */
 let G = null, screen = 'menu', rng = Math.random, gamesSinceAd = 0;
 function newGame(daily = false){
   rng = daily ? mulberry32((dailyNumber() * 2246822519) >>> 0) : Math.random;
   G = { daily, grid: Array.from({ length: N }, () => Array(N).fill(null)), tray: [], score: 0, shown: 0, lines: 0, flushes: 0, combo: 0, bestCombo: 0,
-        movesSinceClear: 0, revived: false, freeSwap: true, over: false, moves: 0, fx: [], parts: [], texts: [], shake: 0, flash: 0, banner: null, log: [] };
+        movesSinceClear: 0, revived: false, freeSwap: true, over: false, moves: 0, fx: [], parts: [], texts: [], shake: 0, flash: 0, banner: null, log: [],
+        freeze: 0, slow: 0, bump: 0, lastScore: 0, danger: 0, wasDanger: false, tip: null, hintT: 0 };
   refill();
 }
 function makePiece(){
@@ -408,12 +417,16 @@ function refill(){
 /* ================= Placing & clearing ================= */
 function place(i, r, c){
   const p = G.tray[i]; if (!p || !canPlace(p, r, c)) return false;
-  p.cells.forEach(([y, x], k) => { G.grid[r + y][c + x] = { color: p.color, special: p.special && p.special.i === k ? p.special.type : null, pop: .18 }; });
+  p.cells.forEach(([y, x], k) => { G.grid[r + y][c + x] = { color: p.color, special: p.special && p.special.i === k ? p.special.type : null, land: .22 }; });
+  G.shake = Math.max(G.shake, 2.5); buzz(8);
+  if (!save.tip_drag) tipDone('drag');
+  if (tutOn() && p.special && !save.tip_special){ G.tip = { text: { bomb: '💣 Bombs clear the tiles around them', bolt: '⚡ Lightning clears its whole row and column', prism: '🌈 Rainbow tiles count as any colour' }[p.special.type], life: 3.6 }; tipDone('special'); }
   G.tray[i] = null; G.moves++;
   G.score += p.cells.length;
   Sound.place();
-  resolve();
+  const cleared = resolve();
   if (G.tray.every(t => !t)) refill();
+  afterMove(cleared);
   if (!G.tray.some(t => t && fitsAnywhere(t))) gameOver();
   return true;
 }
@@ -424,7 +437,7 @@ function resolve(){
   if (!full.length){
     G.movesSinceClear++;
     if (G.movesSinceClear >= 3 && G.combo){ G.combo = 0; }
-    return;
+    return false;
   }
   const kill = new Set(), key = (r, c) => r * N + c;
   let flushes = 0;
@@ -442,8 +455,8 @@ function resolve(){
     const r = Math.floor(k / N), c = k % N, t = G.grid[r][c]; if (!t || !t.special || t.special === 'prism') continue;
     chain++;
     const add = (rr, cc) => { if (rr >= 0 && cc >= 0 && rr < N && cc < N && G.grid[rr][cc] && !kill.has(key(rr, cc))){ kill.add(key(rr, cc)); queue.push(key(rr, cc)); } };
-    if (t.special === 'bomb'){ for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) add(r + dr, c + dc); G.fx.push({ type: 'boom', r, c, life: .5 }); Sound.boom(); G.shake = Math.max(G.shake, 12); }
-    if (t.special === 'bolt'){ for (let k2 = 0; k2 < N; k2++){ add(r, k2); add(k2, c); } G.fx.push({ type: 'bolt', r, c, life: .4 }); Sound.zap(); G.shake = Math.max(G.shake, 8); }
+    if (t.special === 'bomb'){ for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) add(r + dr, c + dc); G.fx.push({ type: 'boom', r, c, life: .5 }); Sound.boom(); G.shake = Math.max(G.shake, 18); buzz(50); }
+    if (t.special === 'bolt'){ for (let k2 = 0; k2 < N; k2++){ add(r, k2); add(k2, c); } G.fx.push({ type: 'bolt', r, c, life: .4 }); Sound.zap(); G.shake = Math.max(G.shake, 14); buzz(35); }
   }
   const lines = full.length;
   G.combo++; G.bestCombo = Math.max(G.bestCombo, G.combo); G.movesSinceClear = 0;
@@ -453,7 +466,8 @@ function resolve(){
   G.lines += lines; G.flushes += flushes;
   for (const k of kill){
     const r = Math.floor(k / N), c = k % N, t = G.grid[r][c]; if (!t) continue;
-    G.fx.push({ type: 'tile', r, c, color: t.color, life: .35 });
+    const along = full[0].kind === 'r' ? c : r;
+    G.fx.push({ type: 'tile', r, c, color: t.color, life: .35, delay: along * .028 });
     burst(r, c, COLORS[t.color], flushes ? 7 : 4);
     G.grid[r][c] = null;
   }
@@ -467,11 +481,44 @@ function resolve(){
   G.score += pts;
   G.texts.push({ v: '+' + fmt(pts), life: 1, r: full[0].kind === 'r' ? full[0].i : 3.5, c: full[0].kind === 'c' ? full[0].i : 3.5 });
   G.log.push(flushes ? '🌈' : chain ? '💥' : lines >= 2 ? '🔥' : '🟩');
+  // ---- how it feels: sweep, shockwave, hit-stop, buzz, combo pop-up ----
+  const { cs } = L;
+  for (const Ln of full){
+    G.fx.push({ type: 'sweep', kind: Ln.kind, i: Ln.i, life: .32, max: .32, flush: !!flushes });
+    const cx = Ln.kind === 'r' ? N / 2 : Ln.i + .5, cy = Ln.kind === 'r' ? Ln.i + .5 : N / 2;
+    G.fx.push({ type: 'ring', cx, cy, life: .45, max: .45, c: flushes ? '#ffffff' : '#bfe9ff' });
+  }
+  G.freeze = Math.max(G.freeze, Math.min(.14, .045 + lines * .03 + (chain ? .04 : 0)));
+  buzz(flushes ? [30, 40, 70] : 18 + lines * 14);
+  if (G.combo >= 2) G.texts.push({ v: `×${G.combo} COMBO`, life: 1.2, r: full[0].kind === 'r' ? full[0].i - .9 : 2.6, c: full[0].kind === 'c' ? full[0].i : 3.5, size: Math.min(46, 20 + G.combo * 5), col: ['#80ed99', '#5ee87a', '#3fd0ff', '#c77dff', '#ff4d8a', '#ffc23d'][Math.min(G.combo - 2, 5)] });
+  if (flushes){
+    G.slow = Math.max(G.slow, .35); G.shake = Math.max(G.shake, 10);
+    // rainbow confetti out of every flushed line
+    for (const f of G.fx) if (f.type === 'flushLine' && !f.confetti){ f.confetti = 1; for (let k = 0; k < N; k++){ const rr2 = f.kind === 'r' ? f.i : k, cc2 = f.kind === 'r' ? k : f.i; burst(rr2, cc2, COLORS[(k + f.i) % COLORS.length], 5); } }
+    if (G.banner) G.banner.big = 1;
+  }
+  return true;
+}
+// after each move: the nearly-full board gets a heartbeat and a short slow-down, once each time you get into trouble
+function afterMove(cleared){
+  let filled = 0; for (const row of G.grid) for (const t of row) if (t) filled++;
+  const danger = filled >= 46;
+  if (danger && !G.wasDanger && !cleared){ G.slow = Math.max(G.slow, .5); Sound.beat(); buzz([20, 60, 20]); }
+  G.wasDanger = danger;
+  // first time a line is one tile short of a Flush, point it out
+  if (tutOn() && !save.tip_flush && !G.tip){
+    for (let i = 0; i < N && !G.tip; i++) for (const kind of ['r', 'c']){
+      const cells = []; for (let k = 0; k < N; k++) cells.push(kind === 'r' ? G.grid[i][k] : G.grid[k][i]);
+      const tiles = cells.filter(Boolean); if (tiles.length !== N - 1) continue;
+      const cols = new Set(tiles.filter(t => t.special !== 'prism').map(t => t.color));
+      if (cols.size === 1){ G.tip = { text: 'Finish this line in the same colour for a FLUSH: ×3 points!', life: 4.5, line: { kind, i } }; tipDone('flush'); break; }
+    }
+  }
 }
 function gameOver(){
   if (G.over) return;
-  G.over = true; Portal.gameplayStop();
-  setTimeout(() => { if (G && G.over) showOver(); }, 650);
+  G.over = true; Portal.gameplayStop(); G.slow = .9; G.endT = 0; buzz([40, 80, 120]);
+  setTimeout(() => { if (G && G.over) showOver(); }, 900);
 }
 
 /* ================= Layout & drawing ================= */
@@ -594,6 +641,9 @@ function wouldClear(p, r, c){
 }
 
 function draw(dt){
+  const realDt = dt;
+  // hit-stop and slow motion bend time for the effects, never for input
+  if (G){ if (G.freeze > 0){ G.freeze -= realDt; dt *= .06; } else if (G.slow > 0){ G.slow -= realDt; dt *= .35; } }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const bgImg = backdropImg();
   if (bgImg){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bgImg, 0, 0); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
@@ -605,11 +655,14 @@ function draw(dt){
 
   // header
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
-  G.shown += (G.score - G.shown) * Math.min(1, dt * 10); if (Math.abs(G.score - G.shown) < 1) G.shown = G.score;
+  G.shown += (G.score - G.shown) * Math.min(1, realDt * 10); if (Math.abs(G.score - G.shown) < 1) G.shown = G.score;
+  if (G.score !== G.lastScore){ G.bump = Math.min(1, .45 + (G.score - G.lastScore) / 300); G.lastScore = G.score; }
+  G.bump = Math.max(0, G.bump - realDt * 4);
   if (!COVER){
-  ctx.font = `900 ${Math.round(Math.min(56, VW / 8))}px ui-rounded,system-ui,sans-serif`; ctx.shadowColor = 'rgba(160,140,255,.7)'; ctx.shadowBlur = 14; ctx.fillText(fmt(Math.round(G.shown)), VW / 2, by - Math.max(10, cs * .3) - 44); ctx.shadowBlur = 0;
+  { const sc = 1 + G.bump * .3, sy = by - Math.max(10, cs * .3) - 44; ctx.save(); ctx.translate(VW / 2, sy); ctx.scale(sc, sc);
+    ctx.font = `900 ${Math.round(Math.min(56, VW / 8))}px ui-rounded,system-ui,sans-serif`; ctx.shadowColor = G.bump > .05 ? 'rgba(255,200,90,.9)' : 'rgba(160,140,255,.7)'; ctx.shadowBlur = 14; ctx.fillText(fmt(Math.round(G.shown)), 0, 0); ctx.restore(); ctx.shadowBlur = 0; }
   ctx.font = '900 15px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = '#c9c0ff';
-  ctx.fillText(G.daily ? `DAILY PUZZLE #${dailyNumber()}` : `BEST ${fmt(Math.max(save.best, G.score))}`, VW / 2, by - Math.max(10, cs * .3) - 12);
+  if (!(tutOn() && !save.tip_drag)) ctx.fillText(G.daily ? `DAILY PUZZLE #${dailyNumber()}` : `BEST ${fmt(Math.max(save.best, G.score))}`, VW / 2, by - Math.max(10, cs * .3) - 12);
   if (G.combo >= 2){ ctx.textAlign = 'right'; ctx.fillStyle = '#80ed99'; ctx.font = '900 15px ui-rounded,system-ui,sans-serif'; ctx.fillText(`COMBO ×${G.combo}`, bx + size, by - Math.max(10, cs * .3) - 12); }
   }
 
@@ -627,10 +680,13 @@ function draw(dt){
   for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){
     const t = G.grid[r][c]; if (!t) continue;
     const lit = hi && (hi.rows.includes(r) || hi.cols.includes(c));
-    const pop = t.pop || 0; if (pop > 0) t.pop = Math.max(0, pop - dt);
-    const k = 1 + pop * 1.2;
-    const x = bx + c * cs - (k - 1) * cs / 2, y = by + r * cs - (k - 1) * cs / 2;
-    block(x, y, cs * k, COLORS[t.color], t.special);
+    const land = t.land || 0; if (land > 0) t.land = Math.max(0, land - dt);
+    if (land > 0){
+      // squash on landing, then spring back: wide and flat, a little tall, then square
+      const u = 1 - land / .22, sq = Math.sin(u * Math.PI) * (1 - u) * .9, sxk = 1 + sq * .22, syk = 1 - sq * .26;
+      ctx.save(); ctx.translate(bx + (c + .5) * cs, by + (r + 1) * cs); ctx.scale(sxk, syk);
+      block(-cs / 2, -cs, cs, COLORS[t.color], t.special); ctx.restore();
+    } else block(bx + c * cs, by + r * cs, cs, COLORS[t.color], t.special);
     if (lit){ ctx.fillStyle = 'rgba(255,255,255,.28)'; rr(bx + c * cs + 3, by + r * cs + 3, cs - 6, cs - 6, cs * .16); ctx.fill(); }
   }
   if (tgt && tgt.ok){
@@ -641,6 +697,16 @@ function draw(dt){
   // effects
   for (const f of G.fx){
     f.life -= dt;
+    if (f.delay > 0){ f.delay -= dt; f.life += dt; if (f.type === 'tile'){ block(bx + f.c * cs, by + f.r * cs, cs, COLORS[f.color], null); continue; } }
+    if (f.type === 'sweep'){ const u = 1 - f.life / f.max, len = size * 1.25, pos = -size * .25 + u * len;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, f.life / f.max * 2) * .85;
+      const g2 = f.kind === 'r' ? ctx.createLinearGradient(bx + pos - cs * 2, 0, bx + pos, 0) : ctx.createLinearGradient(0, by + pos - cs * 2, 0, by + pos);
+      g2.addColorStop(0, 'rgba(255,255,255,0)'); g2.addColorStop(1, f.flush ? 'rgba(255,240,255,.95)' : 'rgba(200,240,255,.8)'); ctx.fillStyle = g2;
+      const a0 = Math.max(0, pos - cs * 2), a1 = Math.min(size, pos);   // the band stays inside the board
+      if (a1 > a0){ if (f.kind === 'r') ctx.fillRect(bx + a0, by + f.i * cs, a1 - a0, cs); else ctx.fillRect(bx + f.i * cs, by + a0, cs, a1 - a0); }
+      ctx.restore(); }
+    if (f.type === 'ring'){ const u = 1 - f.life / f.max; ctx.globalAlpha = Math.max(0, f.life / f.max) * .8; ctx.strokeStyle = f.c; ctx.lineWidth = 3 + (1 - u) * 6;
+      ctx.beginPath(); ctx.arc(bx + f.cx * cs, by + f.cy * cs, cs * (.6 + u * 5), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
     if (f.type === 'tile'){ const k = f.life / .35; const s = cs * (1 + (1 - k) * .4); block(bx + (f.c + .5) * cs - s / 2, by + (f.r + .5) * cs - s / 2, s, COLORS[f.color], null, save.skin, Math.max(0, k)); }
     if (f.type === 'flushLine'){ ctx.globalAlpha = Math.max(0, f.life); ctx.fillStyle = '#fff'; if (f.kind === 'r') rr(bx, by + f.i * cs, size, cs, 10); else rr(bx + f.i * cs, by, cs, size, 10); ctx.fill(); ctx.globalAlpha = 1; }
     if (f.type === 'boom'){ ctx.globalAlpha = Math.max(0, f.life * 2); ctx.strokeStyle = '#ffb703'; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(bx + (f.c + .5) * cs, by + (f.r + .5) * cs, cs * (2.2 - f.life * 2), 0, TAU); ctx.stroke(); ctx.globalAlpha = 1; }
@@ -666,17 +732,63 @@ function draw(dt){
   for (const q of G.parts){ q.vy += 900 * dt; q.x += q.vx * dt; q.y += q.vy * dt; q.life -= dt; ctx.globalAlpha = clamp(q.life * 2, 0, 1); ctx.fillStyle = q.c; ctx.fillRect(q.x, q.y, q.s, q.s); }
   G.parts = G.parts.filter(q => q.life > 0 && q.y < VH + 40); ctx.globalAlpha = 1;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  for (const t of G.texts){ t.life -= dt; ctx.globalAlpha = clamp(t.life * 2, 0, 1); ctx.fillStyle = '#fff'; ctx.font = '900 24px ui-rounded,system-ui,sans-serif'; ctx.fillText(t.v, bx + (t.c + .5) * cs, by + (t.r + .5) * cs - (1 - t.life) * 40); }
+  for (const t of G.texts){ t.life -= dt; ctx.globalAlpha = clamp(t.life * 2, 0, 1); const sz = t.size || 24, pop2 = t.size ? 1 + Math.max(0, t.life - .9) * 1.6 : 1;
+    ctx.font = `900 ${Math.round(sz * pop2)}px ui-rounded,system-ui,sans-serif`; const tx = clamp(bx + (t.c + .5) * cs, 90, VW - 90), ty = by + (t.r + .5) * cs - (1 - t.life) * 40;
+    if (t.size){ ctx.lineJoin = 'round'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(20,12,60,.85)'; ctx.strokeText(t.v, tx, ty); }
+    ctx.fillStyle = t.col || '#fff'; ctx.fillText(t.v, tx, ty); }
   G.texts = G.texts.filter(t => t.life > 0); ctx.globalAlpha = 1;
   if (G.banner){
-    const b = G.banner; b.life -= dt; const k = clamp(b.life, 0, 1), pop = 1 + Math.max(0, b.life - 1) * .6;
+    const b = G.banner; b.life -= dt; const k = clamp(b.life, 0, 1), pop = (1 + Math.max(0, b.life - 1) * .6) * (b.big ? 1.35 : 1);
     ctx.globalAlpha = k; ctx.font = `900 ${Math.round(Math.min(56, VW / 7) * pop)}px ui-rounded,system-ui,sans-serif`;
-    ctx.lineJoin = 'round'; ctx.lineWidth = 8; ctx.strokeStyle = 'rgba(20,12,60,.85)'; ctx.strokeText(b.text, VW / 2, by + size / 2); ctx.shadowColor = b.c; ctx.shadowBlur = 20; ctx.fillStyle = b.c; ctx.fillText(b.text, VW / 2, by + size / 2); ctx.shadowBlur = 0;
+    { const w2 = ctx.measureText(b.text).width; if (w2 > VW * .94) ctx.font = `900 ${Math.floor(Math.min(56, VW / 7) * pop * VW * .94 / w2)}px ui-rounded,system-ui,sans-serif`; }
+    if (b.big){ const rg = ctx.createLinearGradient(VW / 2 - size / 2, 0, VW / 2 + size / 2, 0); rg.addColorStop(0, '#ff4d8a'); rg.addColorStop(.33, '#ffc23d'); rg.addColorStop(.66, '#5ee87a'); rg.addColorStop(1, '#3fd0ff'); b.fill = rg; }
+    ctx.lineJoin = 'round'; ctx.lineWidth = 8; ctx.strokeStyle = 'rgba(20,12,60,.85)'; ctx.strokeText(b.text, VW / 2, by + size / 2); ctx.shadowColor = b.c; ctx.shadowBlur = 20; ctx.fillStyle = b.fill || b.c; ctx.fillText(b.text, VW / 2, by + size / 2); ctx.shadowBlur = 0;
     ctx.globalAlpha = 1; if (b.life <= 0) G.banner = null;
   }
-  if (G.flash > 0){ ctx.fillStyle = `rgba(255,255,255,${G.flash * .3})`; ctx.fillRect(-20, -20, VW + 40, VH + 40); G.flash = Math.max(0, G.flash - dt * 1.5); }
-  G.shake *= Math.pow(.002, dt);
+  if (G.flash > 0){ ctx.fillStyle = `rgba(255,255,255,${G.flash * .22})`; ctx.fillRect(-20, -20, VW + 40, VH + 40); G.flash = Math.max(0, G.flash - realDt * 1.5); }
+  // nearly full: a slow red pulse at the edges
+  G.danger += ((G.wasDanger && !G.over ? 1 : 0) - G.danger) * Math.min(1, realDt * 3);
+  if (G.danger > .02){ const pulse = .5 + Math.sin(performance.now() / 260) * .5, vg = ctx.createRadialGradient(VW / 2, VH / 2, Math.min(VW, VH) * .35, VW / 2, VH / 2, Math.max(VW, VH) * .75);
+    vg.addColorStop(0, 'rgba(255,40,90,0)'); vg.addColorStop(1, `rgba(255,40,90,${G.danger * (.16 + pulse * .14)})`); ctx.fillStyle = vg; ctx.fillRect(-20, -20, VW + 40, VH + 40); }
+  if (G.over && !COVER){ G.endT = (G.endT || 0) + realDt; ctx.fillStyle = `rgba(8,5,30,${Math.min(.45, G.endT * .6)})`; ctx.fillRect(-20, -20, VW + 40, VH + 40); }
+  if (!COVER) drawTutorial(realDt);
+  G.shake *= Math.pow(.002, realDt);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+// first game: a hand drags the first tray piece onto the board until you place something; then short tips
+function drawTutorial(dt){
+  const { bx, by, cs, size } = L;
+  if (G.tip){
+    const tp = G.tip; tp.life -= dt; const a = clamp(tp.life, 0, 1) * clamp((4.6 - tp.life) * 4, 0, 1);
+    if (tp.line){ ctx.globalAlpha = a * (.5 + Math.sin(performance.now() / 160) * .3); ctx.strokeStyle = '#ffe27a'; ctx.lineWidth = 3;
+      if (tp.line.kind === 'r') rr(bx + 1, by + tp.line.i * cs + 1, size - 2, cs - 2, 10); else rr(bx + tp.line.i * cs + 1, by + 1, cs - 2, size - 2, 10); ctx.stroke(); }
+    ctx.globalAlpha = a; ctx.font = `800 ${VW < 430 ? 14 : 16}px ui-rounded,system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const tw = Math.min(VW - 24, ctx.measureText(tp.text).width + 36), ty = by + size + Math.max(10, cs * .3) * .5;   // on the board's bottom edge, clear of the tray
+    rr(VW / 2 - tw / 2, ty - 17, tw, 34, 17); ctx.fillStyle = 'rgba(20,14,60,.92)'; ctx.fill(); ctx.strokeStyle = '#ffc23d'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.fillText(tp.text, VW / 2, ty + 1, tw - 20); ctx.globalAlpha = 1;
+    if (tp.life <= 0) G.tip = null;
+  }
+  if (!tutOn() || save.tip_drag || drag || G.over || screen !== 'play') return;
+  const i = G.tray.findIndex(p => p && fitsAnywhere(p)); if (i < 0) return;
+  const p = G.tray[i];
+  // aim for the middle of the board
+  let best = null; for (let r = 0; r <= N - p.h; r++) for (let c = 0; c <= N - p.w; c++) if (canPlace(p, r, c)){ const d = Math.abs(r + p.h / 2 - 4) + Math.abs(c + p.w / 2 - 4); if (!best || d < best.d) best = { r, c, d }; }
+  if (!best) return;
+  G.hintT += dt; const T = 2, u = (G.hintT % T) / T;
+  const sx = bx + L.slot * i + L.slot / 2, sy = L.ty + L.th / 2, ex = bx + (best.c + p.w / 2) * cs, ey = by + (best.r + p.h / 2) * cs;
+  const m = u < .15 ? 0 : u > .8 ? 1 : (u - .15) / .65, e = m * m * (3 - 2 * m), hx = sx + (ex - sx) * e, hy = sy + (ey - sy) * e - Math.sin(e * Math.PI) * cs * .8;
+  const fade = u > .9 ? (1 - u) * 10 : 1;
+  // the piece rides along, faint
+  p.cells.forEach(([y, x]) => block(hx - p.w * cs / 2 + x * cs, hy - p.h * cs / 2 + y * cs, cs, COLORS[p.color], null, save.skin, .4 * fade));
+  ctx.globalAlpha = fade; ctx.save(); ctx.translate(hx + cs * .15, hy + cs * .2); ctx.rotate(-.35);
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = 'rgba(20,14,60,.8)'; ctx.lineWidth = 2;
+  rr(-7, -22, 14, 30, 7); ctx.fill(); ctx.stroke();                 // finger
+  rr(-13, 2, 30, 26, 10); ctx.fill(); ctx.stroke();                 // hand
+  ctx.restore();
+  if (u < .15 || u > .8){ ctx.strokeStyle = 'rgba(255,226,122,.9)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(hx, hy, cs * (.35 + (u < .15 ? u : u - .8) * 3), 0, TAU); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+  ctx.font = `900 ${VW < 430 ? 15 : 17}px ui-rounded,system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffe27a';
+  ctx.fillText('Drag a piece onto the board', VW / 2, by - Math.max(10, cs * .3) - 12);   // in place of the BEST line while the hint runs
 }
 
 /* ================= Input: drag pieces from the tray ================= */
@@ -723,7 +835,7 @@ function refreshMenu(){
   $('muteTx').textContent = 'Sound: ' + (save.muted ? 'off' : 'on');
   $('muteIco').setAttribute('href', save.muted ? '#i-mute' : '#i-sound');
 }
-function startGame(daily = false){ Sound.init(); newGame(daily); screen = 'play'; show(null); Portal.gameplayStart(); }
+function startGame(daily = false, quiet = false){ if (!quiet) Sound.init(); newGame(daily); screen = 'play'; show(null); Portal.gameplayStart(); }
 function gemsFor(){ return Math.floor(G.score / 150) + G.flushes * 2; }
 function showOver(){
   screen = 'over'; Sound.over();
@@ -815,6 +927,11 @@ function frame(t){
   try { draw(dt); } catch(err){ drag = null; ctx.setTransform(1, 0, 0, 1, 0, 0); }
 }
 refreshMenu(); requestAnimationFrame(frame);
+// sound wakes on the first touch or key (browsers only allow audio after one)
+addEventListener('pointerdown', () => Sound.init(), { capture: true });
+addEventListener('keydown', () => Sound.init(), { capture: true });
+// land straight in a game. ?menu opens the menu instead (and the capture tools' ?debug / ?cover keep the old start)
+if (!/[?&](debug|cover|menu)\b/.test(location.search)) startGame(false, true);
 
 if (/[?&]debug\b/.test(location.search)) window.__pp = {
   get G(){ return G; }, newGame, place, canPlace, fitsAnywhere, wouldClear, get screen(){ return screen; }, set screen(v){ screen = v; }, save, show, refill, draw, layout: L,

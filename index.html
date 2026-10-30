@@ -13,82 +13,166 @@
 <meta name="twitter:image" content="https://steveg-dev.github.io/prism-pop/covers/cover-1920x1080.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0b1e'/%3E%3Crect x='10' y='10' width='20' height='20' rx='5' fill='%23ff4d6d'/%3E%3Crect x='34' y='10' width='20' height='20' rx='5' fill='%23ffb703'/%3E%3Crect x='10' y='34' width='20' height='20' rx='5' fill='%234cc9f0'/%3E%3Crect x='34' y='34' width='20' height='20' rx='5' fill='%2380ed99'/%3E%3C/svg%3E">
 <style>
-  :root{ --bg:#0d0b1e; --panel:rgba(22,19,48,.95); --line:rgba(255,255,255,.12); --text:#f7f5ff; --muted:#a9a3cc; --gold:#ffd166; --mint:#80ed99; }
+  :root{ --bg:#0b0826; --text:#f7f5ff; --muted:#c3bde8; --gold:#ffc23d; --mint:#6cf08a; }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;background:var(--bg);color:var(--text);overflow:hidden;
-    font-family:ui-rounded,"SF Pro Rounded","Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI Variable Display",system-ui,-apple-system,"Segoe UI",sans-serif;
     -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
   canvas{display:block;position:fixed;inset:0}
   button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-  .screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(6,5,15,.6);backdrop-filter:blur(4px);z-index:3;overflow-y:auto}
+  svg{display:block}
+  #sprite{position:absolute;width:0;height:0;overflow:hidden}
+
+  .screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(6,4,22,.25);z-index:3;overflow-y:auto}
   .screen.on{display:flex}
-  .card{width:100%;max-width:390px;margin:auto;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:24px 20px;text-align:center;box-shadow:0 20px 70px rgba(0,0,0,.55)}
-  h1{font-size:44px;font-weight:900;line-height:1;background:linear-gradient(90deg,#ff4d6d,#ffb703,#80ed99,#4cc9f0,#c77dff);-webkit-background-clip:text;background-clip:text;color:transparent}
-  h2{font-size:26px;font-weight:900}
-  .tag{color:var(--muted);margin:10px 0 20px;line-height:1.45}
-  .btn{display:block;width:100%;padding:15px;border-radius:14px;margin-top:10px;font-weight:900;font-size:17px;background:rgba(255,255,255,.07);border:1px solid var(--line);transition:transform .08s}
+  #over{background:rgba(6,4,22,.4);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+  .card{position:relative;width:100%;max-width:420px;margin:auto;border-radius:30px;padding:24px 22px 18px;text-align:center;
+    border:2px solid transparent;
+    background:linear-gradient(180deg,rgba(30,26,78,.82),rgba(12,10,40,.92)) padding-box,linear-gradient(170deg,#6fd6ff,#8a6bff 40%,#c85cff 70%,#ff6ad5) border-box;
+    box-shadow:0 0 22px rgba(130,110,255,.55),0 0 70px rgba(200,90,255,.18),inset 0 0 40px rgba(110,100,255,.12),0 30px 80px rgba(0,0,0,.55);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+
+  /* the logo: gold PRISM, cyan POP, little gem tiles at the corners */
+  .logo{position:relative;display:inline-block;font-weight:900;line-height:1;letter-spacing:.5px;font-size:clamp(44px,12.5vw,60px);padding:4px 34px;margin:4px 0 0;white-space:nowrap}
+  .logo span{-webkit-background-clip:text;background-clip:text;color:transparent}
+  .logo .p1{background-image:linear-gradient(180deg,#fff2a0,#ffc23d 50%,#ff8a3d 85%,#ff4d8a);filter:drop-shadow(0 0 10px rgba(255,180,60,.45))}
+  .logo .p2{background-image:linear-gradient(180deg,#c9fbff,#4cdcff 50%,#3d8bff);filter:drop-shadow(0 0 10px rgba(80,200,255,.45))}
+  .gem-t{position:absolute;width:.32em;height:.32em;border-radius:.07em;transform:rotate(24deg);box-shadow:inset 0 .04em 0 rgba(255,255,255,.6),0 0 .2em currentColor}
+  .tag{color:#d6d0ff;margin:10px 0 16px;line-height:1.4;font-size:16.5px;font-weight:600}
+  h2{font-size:42px;font-weight:900;line-height:1.05}
+
+  .btn{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:14px 16px;border-radius:18px;margin-top:11px;font-weight:900;font-size:19px;color:#fff;
+    background:linear-gradient(180deg,rgba(46,40,108,.85),rgba(22,18,58,.92));border:1.5px solid rgba(150,140,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 18px rgba(0,0,0,.35);transition:transform .08s,filter .15s}
+  .btn:hover{filter:brightness(1.12)}
   .btn:active{transform:scale(.97)}
-  .btn.primary{background:linear-gradient(90deg,#ffb703,#ff4d6d);color:#2a0710;border:0}
-  .btn.ad{background:var(--mint);color:#06281a;border:0}
-  .btn small{display:block;font-size:12px;font-weight:700;opacity:.75}
-  .stats{display:flex;justify-content:center;gap:20px;margin-top:16px;color:var(--muted);font-size:13px}
-  .stats b{display:block;color:var(--text);font-size:20px}
-  .big{font-size:56px;font-weight:900;line-height:1;margin:6px 0}
-  .sub{color:var(--muted)}
-  .row{display:flex;gap:10px}.row .btn{flex:1}
-  .link{margin-top:14px;color:var(--muted);font-size:13px;display:block;margin-left:auto;margin-right:auto}
-  .how{text-align:left;color:var(--muted);font-size:14px;line-height:1.5;margin-top:14px}
-  .how b{color:var(--text)}
-  .skins{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 4px}
-  .skin{padding:12px 8px;border-radius:14px;background:rgba(255,255,255,.05);border:2px solid transparent}
-  .skin.eq{border-color:var(--gold)}
-  .skin canvas{position:static;display:block;margin:0 auto 6px;width:64px;height:40px}
-  .skin .c{color:var(--gold);font-weight:800;font-size:12px;margin-top:2px}
+  .btn svg{width:26px;height:26px;flex:none}
+  .btn .tx{display:block;line-height:1.2;text-align:left}
+  .btn small{display:block;font-size:13.5px;font-weight:600;opacity:.85}
+  .btn.primary{color:#fff;font-size:27px;padding:16px;border:2px solid rgba(255,220,200,.8);
+    background:linear-gradient(90deg,#ffb12a,#ff7a3d 35%,#ff4d8a 75%,#ff4fc0);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 0 rgba(160,30,80,.3),0 0 26px rgba(255,90,140,.55),0 8px 22px rgba(0,0,0,.4);text-shadow:0 2px 0 rgba(150,30,60,.4)}
+  .btn.primary svg{width:32px;height:32px}
+  .btn.ad{color:#082a14;border:2px solid rgba(200,255,210,.75);background:linear-gradient(180deg,#8bff9e,#4ee27a);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 0 22px rgba(90,240,130,.45),0 8px 20px rgba(0,0,0,.4)}
+  .btn.ad svg{width:40px;height:40px}
+  .btn.ad small{color:#1c5a2c}
+  .btn.list{justify-content:flex-start;gap:18px;padding:12px 18px}
+  .btn.list .tx{flex:1}
+  .chev{width:22px!important;height:22px!important;margin-left:auto;opacity:.9}
+  .row{display:flex;gap:12px}.row .btn{flex:1;min-width:0}
+  .mini{display:flex;gap:6px}.mini i{width:34px;height:34px;border-radius:8px;box-shadow:inset 0 3px 0 rgba(255,255,255,.45),inset 0 -3px 0 rgba(0,0,0,.18)}
+
+  .stats{display:flex;justify-content:center;margin-top:14px;padding:12px 4px;border-radius:18px;background:rgba(8,6,30,.55);border:1px solid rgba(150,140,255,.22);color:#d0caf5;font-size:15px;font-weight:600}
+  .stats>div{flex:1}
+  .stats>div+div{border-left:1px solid rgba(255,255,255,.14)}
+  .stats b{display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-size:28px;font-weight:900}
+  .stats b svg{width:26px;height:26px}
+  .how{text-align:left;color:#d0caf5;font-size:15px;line-height:1.5;margin-top:12px;padding:12px 16px;border-radius:18px;background:rgba(8,6,30,.55);border:1px solid rgba(150,140,255,.22)}
+  .how b{color:#fff}
+  .how div{display:flex;align-items:center;gap:10px;margin-top:4px}
+  .how div span{font-size:20px;width:24px;text-align:center}
+  .link{margin:12px auto 0;color:#d0caf5;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px}
+  .link svg{width:26px;height:26px}
+
+  .sub{color:#d6d0ff;font-weight:600;font-size:18px}
+  .big{font-size:96px;font-weight:900;line-height:1;margin:4px 0 0;background:linear-gradient(90deg,#f0fbff,#ffffff 40%,#ffd0f0 70%,#ff9ad9);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px rgba(200,160,255,.55))}
+  .best{color:#ffc23d;font-weight:900;font-size:26px;min-height:30px;text-shadow:0 0 14px rgba(255,180,60,.6)}
+  .best.new::before,.best.new::after{content:'⁄ ‒';display:inline-block;margin:0 12px;color:#ffc23d;font-weight:400;letter-spacing:-2px}
+  .best.new::after{content:'‒ ⁄';transform:scaleX(-1)}
+  .confetti{position:absolute;inset:0;pointer-events:none}
+  .confetti i{position:absolute;width:24px;height:24px;border-radius:6px;transform:rotate(25deg);box-shadow:inset 0 3px 0 rgba(255,255,255,.5)}
+  .foot{display:flex;align-items:center;gap:12px;margin-top:12px;color:#d0caf5;font-size:17px;font-weight:700}
+  .foot::before,.foot::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(180,170,255,.5))}
+  .foot::after{background:linear-gradient(270deg,transparent,rgba(180,170,255,.5))}
+  .foot svg{width:22px;height:22px;display:inline;vertical-align:-5px}
+
+  /* skins */
+  #skins .card{max-width:470px}
+  .skins{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 4px}
+  .skin{padding:16px 8px 12px;border-radius:20px;background:linear-gradient(180deg,rgba(44,38,104,.75),rgba(18,15,50,.9));border:1.5px solid rgba(150,140,255,.35);font-size:20px;font-weight:800}
+  .skin.eq{border:2.5px solid #ffb12a;box-shadow:0 0 22px rgba(255,170,40,.6),inset 0 0 24px rgba(255,170,40,.15)}
+  .skin .pv{margin:-14px auto -6px;width:170px;height:90px;background:center/contain no-repeat}
+  .skin .c{display:inline-flex;align-items:center;gap:6px;color:#ffc23d;font-weight:900;font-size:18px;margin-top:2px}
+  .skin .c svg{width:22px;height:22px}
+  #sBackBtn{margin-top:16px;background:linear-gradient(90deg,#5a3cf0,#7a4cff 50%,#9b5cff);border:2px solid rgba(220,200,255,.6);box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 0 22px rgba(150,100,255,.5)}
+
   #ad{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:#000;z-index:9;text-align:center;padding:16px}
   #ad.on{display:flex}#ad .t{font-size:13px;color:#888}#ad .n{font-size:40px;font-weight:900}
   #toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:12px;font-weight:800;opacity:0;transition:opacity .25s;pointer-events:none;z-index:8;white-space:nowrap}
-  #bar{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom));display:none;justify-content:center;gap:10px;z-index:2;padding:0 16px}
+  #bar{position:fixed;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom));display:none;justify-content:center;gap:12px;z-index:2;padding:0 16px}
   #bar.on{display:flex}
-  #bar button{padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.08);font-weight:800;font-size:14px}
-  #bar button.ad{background:rgba(128,237,153,.18);color:var(--mint)}
+  #bar button{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;background:linear-gradient(180deg,rgba(40,34,96,.9),rgba(18,15,50,.94));border:1.5px solid rgba(130,150,255,.6);font-weight:800;font-size:17px;box-shadow:0 0 14px rgba(120,120,255,.3)}
+  #bar button svg{width:24px;height:24px}
+  #bar button{white-space:nowrap}
+  @media (max-width:430px){ #bar{gap:8px;padding:0 10px} #bar button{padding:9px 14px;font-size:15px;gap:8px} #bar button svg{width:20px;height:20px} }
+  @media (max-height:780px){ .card{padding:18px 18px 14px} .tag{margin:6px 0 10px} .btn{margin-top:8px;padding:11px 14px} .btn.primary{padding:12px;font-size:24px} .big{font-size:76px} .how{padding:8px 14px;font-size:14px} .how div{margin-top:1px} .stats{margin-top:10px;padding:8px 4px} }
 </style>
 </head>
 <body>
+<svg id="sprite" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset=".55" stop-color="#ffc93c"/><stop offset="1" stop-color="#f29a12"/></linearGradient>
+    <linearGradient id="g-dia" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9fbff"/><stop offset=".5" stop-color="#45c8ff"/><stop offset="1" stop-color="#2a6bff"/></linearGradient>
+    <linearGradient id="g-cal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a8bff"/><stop offset="1" stop-color="#5a4ce0"/></linearGradient>
+    <linearGradient id="g-shirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d48bff"/><stop offset="1" stop-color="#9b4cf0"/></linearGradient>
+    <linearGradient id="g-home" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ae0ff"/><stop offset="1" stop-color="#3d8bff"/></linearGradient>
+    <linearGradient id="g-flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff3d2e"/><stop offset=".6" stop-color="#ff8a1c"/><stop offset="1" stop-color="#ffd84a"/></linearGradient>
+  </defs>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6.5 4.2c0-1 1-1.5 1.8-1l11.6 7.8c.7.5.7 1.5 0 2L8.3 20.8c-.8.5-1.8 0-1.8-1z" fill="#fff4e0"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 40 40"><rect x="3" y="7" width="34" height="30" rx="7" fill="url(#g-cal)"/><rect x="3" y="7" width="34" height="9" rx="4" fill="#ff6aa8"/><rect x="10" y="3" width="4" height="9" rx="2" fill="#ffd0e4"/><rect x="26" y="3" width="4" height="9" rx="2" fill="#ffd0e4"/><path d="M20 18.5l2.3 4.7 5.2.7-3.8 3.6.9 5.1-4.6-2.4-4.6 2.4.9-5.1-3.8-3.6 5.2-.7z" fill="#fff"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 4.5l7.5 7.5L9 19.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 4.5L7.5 12l7.5 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 8l4.5 3.5L12 4.5l4.5 7L21 8l-1.8 10H4.8z" fill="url(#g-gold)" stroke="#e08a0c" stroke-width=".8" stroke-linejoin="round"/><rect x="4.8" y="18.6" width="14.4" height="2.4" rx="1" fill="#f29a12"/></symbol>
+  <symbol id="i-gem" viewBox="0 0 24 24"><path d="M7 4h10l5 6-10 11L2 10z" fill="url(#g-dia)"/><path d="M2 10h20M7 4l5 6 5-6M12 10v11" stroke="#e6fbff" stroke-width=".9" fill="none" opacity=".75"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.5c1 3.8 6.5 6.2 6.5 11.8A6.5 6.5 0 0 1 5.5 14.3c0-2.8 1.6-4.5 2.8-5.6.2 2 1 3.3 2.3 3.9C10.2 8.8 10.8 5.5 12 2.5z" fill="url(#g-flame)"/><path d="M12 13c1.6 1.4 3 2.6 3 4.4a3 3 0 0 1-6 0c0-1.6 1.2-2.6 3-4.4z" fill="#ffe27a"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M3.5 9h3.8L12 5v14l-4.7-4H3.5z" fill="#5ab8ff"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.3 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#5ab8ff" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M3.5 9h3.8L12 5v14l-4.7-4H3.5z" fill="#5ab8ff"/><path d="M15.5 9.5l5 5M20.5 9.5l-5 5" fill="none" stroke="#5ab8ff" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-tv" viewBox="0 0 40 40"><g stroke="#0d3a1c" stroke-width="2" stroke-linecap="round"><path d="M14 9l6 5 6-5M4 6l3 3M36 6l-3 3M4 34l3-3M36 34l-3-3"/></g><rect x="7" y="13" width="26" height="19" rx="4" fill="#0d3a1c"/><path d="M17 18v9l8-4.5z" fill="#8bff9e"/></symbol>
+  <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 3l4 2 4-2 6 4-3 4-2-1v11H7V10l-2 1-3-4z" fill="url(#g-shirt)"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M2.5 11.5L12 3l9.5 8.5" fill="none" stroke="#7ae0ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10.2V21h5v-6h4v6h5V10.2L12 4z" fill="url(#g-home)"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" fill="#2a8bff"/><path d="M7 9h9l-2.5-2.5M17 15H8l2.5 2.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><g fill="#e8e4ff"><rect x="3" y="5" width="18" height="2.6" rx="1.3"/><rect x="3" y="10.7" width="18" height="2.6" rx="1.3"/><rect x="3" y="16.4" width="18" height="2.6" rx="1.3"/></g></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="18" cy="5.5" r="3.2"/><circle cx="6" cy="12" r="3.2"/><circle cx="18" cy="18.5" r="3.2"/></g><path d="M8.8 10.6l6.4-3.6M8.8 13.4l6.4 3.6" stroke="currentColor" stroke-width="2.2"/></symbol>
+</svg>
+
 <canvas id="c"></canvas>
-<div id="bar"><button id="swapBtn">🔄 Swap pieces</button><button id="menuBtn2">☰ Menu</button></div>
+<div id="bar"><button id="swapBtn"><svg><use href="#i-swap"/></svg><span id="swapTx">Swap pieces (1 free)</span></button><button id="menuBtn2"><svg><use href="#i-list"/></svg>Menu</button></div>
 
 <div id="menu" class="screen on"><div class="card">
-  <h1>PRISM POP</h1>
+  <h1 class="logo"><i class="gem-t" style="left:.12em;top:.02em;background:#ffc23d;color:#ffc23d"></i><i class="gem-t" style="left:0;top:.62em;background:#ff4d8a;color:#ff4d8a;width:.26em;height:.26em"></i><span class="p1">PRISM</span> <span class="p2">POP</span><i class="gem-t" style="right:.12em;top:.02em;background:#4cdcff;color:#4cdcff;transform:rotate(-24deg)"></i><i class="gem-t" style="right:0;top:.62em;background:#6cf08a;color:#6cf08a;width:.26em;height:.26em"></i></h1>
   <p class="tag">Drop blocks. Clear lines. Chain the bombs.</p>
-  <button class="btn primary" id="playBtn">Play</button>
-  <button class="btn" id="dailyBtn">Daily Puzzle</button>
-  <button class="btn" id="skinsBtn">Block skins</button>
-  <div class="stats"><div><b id="mBest">0</b>best</div><div><b id="mGems">0</b>gems</div><div><b id="mStreak">0</b>day streak</div></div>
+  <button class="btn primary" id="playBtn"><svg><use href="#i-play"/></svg>Play</button>
+  <button class="btn list" id="dailyBtn"><svg style="width:44px;height:44px"><use href="#i-cal"/></svg><span class="tx"><span id="dName">Daily Puzzle</span><small id="dSubM">Same pieces for everyone today</small></span><svg class="chev"><use href="#i-chev"/></svg></button>
+  <button class="btn list" id="skinsBtn"><span class="mini" id="miniSkin"><i style="background:#ffc23d"></i><i style="background:#3fd0ff"></i><i style="background:#5ee87a"></i></span><span class="tx" style="text-align:center">Block skins</span><svg class="chev"><use href="#i-chev"/></svg></button>
+  <div class="stats"><div><b><span id="mBest">0</span><svg><use href="#i-crown"/></svg></b>best</div><div><b><span id="mGems">0</span><svg><use href="#i-gem"/></svg></b>gems</div><div><b><span id="mStreak">0</span><svg><use href="#i-flame"/></svg></b>day streak</div></div>
   <div class="how">
-    <b>Fill a row or column</b> to clear it.<br>
-    <b>Flush:</b> clear a line that is all one colour for ×3 points.<br>
-    💣 clears around it · ⚡ clears its row and column · 🌈 counts as any colour.
+    <b>Fill a row or column</b> to clear it.
+    <div><span>🟣</span><span style="font-size:inherit;width:auto;text-align:left"><b>Flush:</b> clear a line that is all one colour for ×3 points.</span></div>
+    <div><span>💣</span><span style="font-size:inherit;width:auto;text-align:left"><b>Bomb</b> clears around it.</span></div>
+    <div><span>⚡</span><span style="font-size:inherit;width:auto;text-align:left"><b>Lightning</b> clears its row and column.</span></div>
+    <div><span>🌈</span><span style="font-size:inherit;width:auto;text-align:left"><b>Rainbow</b> counts as any colour.</span></div>
   </div>
-  <button class="link" id="muteBtn">Sound: on</button>
+  <button class="link" id="muteBtn"><svg><use id="muteIco" href="#i-sound"/></svg><span id="muteTx">Sound: on</span></button>
 </div></div>
 
 <div id="over" class="screen"><div class="card">
+  <div class="confetti"><i style="left:22%;top:26px;background:#ffc23d"></i><i style="left:17%;top:70px;background:#ff4d8a;width:18px;height:18px;transform:rotate(-20deg)"></i><i style="right:22%;top:26px;background:#4cdcff;transform:rotate(-30deg)"></i><i style="right:17%;top:70px;background:#6cf08a;width:18px;height:18px"></i></div>
   <div class="sub" id="oTitle">No more room</div>
   <div class="big" id="oScore">0</div>
-  <div class="sub" id="oBest"></div>
+  <div class="best" id="oBest"></div>
   <div class="stats"><div><b id="oLines">0</b>lines</div><div><b id="oFlush">0</b>flushes</div><div><b id="oCombo">0</b>best combo</div></div>
-  <button class="btn ad" id="reviveBtn">Prism Blast: keep going<small>Watch a short ad · clears every tile of your most common colour</small></button>
-  <button class="btn primary" id="againBtn">Play again</button>
-  <button class="btn" id="shareBtn">Share</button>
-  <div class="row"><button class="btn" id="oSkinsBtn">Skins</button><button class="btn" id="oMenuBtn">Menu</button></div>
-  <div class="link" id="oGems"></div>
+  <button class="btn ad" id="reviveBtn"><svg><use href="#i-tv"/></svg><span class="tx"><span style="font-size:20px">Prism Blast: keep going</span><small>Watch a short ad · clears every tile of your most common colour</small></span></button>
+  <button class="btn primary" id="againBtn" style="font-size:24px"><svg><use href="#i-play"/></svg>Play again</button>
+  <button class="btn" id="shareBtn"><svg><use href="#i-share"/></svg>Share</button>
+  <div class="row"><button class="btn" id="oSkinsBtn"><svg><use href="#i-shirt"/></svg>Skins</button><button class="btn" id="oMenuBtn"><svg><use href="#i-home"/></svg>Menu</button></div>
+  <div class="foot" id="oGems"></div>
 </div></div>
 
 <div id="skins" class="screen"><div class="card">
-  <h2>Block skins</h2>
-  <div class="sub">Earn 💎 gems by scoring and flushing. You have <b id="sGems">0</b></div>
+  <h2 class="logo" style="font-size:clamp(36px,10vw,48px)"><i class="gem-t" style="left:.12em;top:.02em;background:#ffc23d;color:#ffc23d"></i><i class="gem-t" style="left:0;top:.62em;background:#ff4d8a;color:#ff4d8a;width:.26em;height:.26em"></i><span class="p1">Block</span> <span class="p2">skins</span><i class="gem-t" style="right:.12em;top:.02em;background:#4cdcff;color:#4cdcff;transform:rotate(-24deg)"></i><i class="gem-t" style="right:0;top:.62em;background:#6cf08a;color:#6cf08a;width:.26em;height:.26em"></i></h2>
+  <div class="sub" style="font-size:16px">Earn <svg style="display:inline;width:18px;height:18px;vertical-align:-3px"><use href="#i-gem"/></svg> gems by scoring and flushing. You have <b id="sGems" style="color:#fff">0</b></div>
   <div class="skins" id="skinList"></div>
-  <button class="btn" id="sBackBtn">Back</button>
+  <button class="btn" id="sBackBtn"><svg><use href="#i-back"/></svg>Back</button>
 </div></div>
 
 <div id="ad"><div class="t">AD PLACEHOLDER</div><div class="n" id="adN">3</div><div class="t">A portal ad (CrazyGames / Poki) plays here</div></div>
@@ -239,7 +323,7 @@ const Sound = (() => {
 
 /* ================= Content ================= */
 const N = 8;                                         // 8x8 board
-const COLORS = ['#ff4d6d', '#ffb703', '#4cc9f0', '#80ed99'];   // four colours keeps a Flush reachable when you plan for it
+const COLORS = ['#ff4d8a', '#ffc23d', '#3fd0ff', '#5ee87a'];   // four colours keeps a Flush reachable when you plan for it
 const SHAPES = [                                     // [weight, cells as rows of strings]
   [3, ['#']], [5, ['##']], [5, ['#', '#']], [5, ['###']], [5, ['#', '#', '#']],
   [3, ['####']], [3, ['#', '#', '#', '#']], [1.5, ['#####']], [1.5, ['#', '#', '#', '#', '#']],
@@ -396,12 +480,49 @@ let dpr = 1, VW = 0, VH = 0, L = { bx: 0, by: 0, cs: 40, size: 320, ty: 0, slot:
 function resize(){
   dpr = Math.min(window.devicePixelRatio || 1, 2); VW = innerWidth; VH = innerHeight;
   cvs.width = VW * dpr; cvs.height = VH * dpr; cvs.style.width = VW + 'px'; cvs.style.height = VH + 'px';
-  const size = Math.floor(Math.min(VW - 28, (VH - 250) * .98, 520));
-  L.size = size; L.cs = size / N; L.bx = (VW - size) / 2; L.by = Math.max(96, (VH - size - 190) / 2 + 40);
+  const size = Math.floor(Math.min(VW - 44, (VH - 260) * .98, 520));
+  L.size = size; L.cs = size / N; L.bx = (VW - size) / 2; L.by = Math.max(108, (VH - size - 190) / 2 + 50);
   L.ty = L.by + size + 24; L.slot = size / 3; L.th = Math.min(150, VH - L.ty - 60);
 }
 addEventListener('resize', resize); resize();
 
+// the backdrop: soft glowing cubes floating over a shiny floor, painted once per window size
+const backdrop = { img: null, w: 0, h: 0 };
+const CUBE_COLS = ['#ffc23d', '#3fd0ff', '#5ee87a', '#ff4d8a', '#a46bff'];
+function glassCube(g, x, y, s, rot, col, a, blur){
+  g.save(); g.translate(x, y); g.rotate(rot); g.globalAlpha = a;
+  if (blur && 'filter' in g) g.filter = `blur(${blur}px)`;
+  const gl = g.createRadialGradient(0, 0, s * .3, 0, 0, s * 1.3); gl.addColorStop(0, col + '88'); gl.addColorStop(1, col + '00');
+  g.fillStyle = gl; g.fillRect(-s * 1.4, -s * 1.4, s * 2.8, s * 2.8);
+  const b = g.createLinearGradient(-s / 2, -s / 2, s / 2, s / 2); b.addColorStop(0, '#ffffff'); b.addColorStop(.18, col); b.addColorStop(1, col);
+  const r = s * .2, h = s / 2;
+  g.beginPath(); g.moveTo(-h + r, -h); g.arcTo(h, -h, h, h, r); g.arcTo(h, h, -h, h, r); g.arcTo(-h, h, -h, -h, r); g.arcTo(-h, -h, h, -h, r); g.closePath();
+  g.fillStyle = b; g.fill();
+  g.fillStyle = 'rgba(255,255,255,.35)'; g.beginPath(); g.ellipse(-s * .12, -s * .26, s * .26, s * .08, -.2, 0, Math.PI * 2); g.fill();
+  g.restore(); g.filter = 'none'; g.globalAlpha = 1;
+}
+function backdropImg(){
+  if (backdrop.img && backdrop.w === cvs.width && backdrop.h === cvs.height) return backdrop.img;
+  if (!cvs.width || !cvs.height) return null;
+  const c = document.createElement('canvas'); c.width = cvs.width; c.height = cvs.height;
+  const g = c.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const rnd = mulberry32(77), U = Math.min(VW, VH) / 700;
+  const base = g.createRadialGradient(VW * .5, VH * .4, 0, VW * .5, VH * .5, Math.max(VW, VH) * .8);
+  base.addColorStop(0, '#24206a'); base.addColorStop(.6, '#120e3e'); base.addColorStop(1, '#070520');
+  g.fillStyle = base; g.fillRect(0, 0, VW, VH);
+  // glowing floor: reflections of light streaks near the bottom
+  const fl = g.createLinearGradient(0, VH * .7, 0, VH); fl.addColorStop(0, 'rgba(120,80,255,0)'); fl.addColorStop(1, 'rgba(120,80,255,.25)'); g.fillStyle = fl; g.fillRect(0, VH * .7, VW, VH * .3);
+  g.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 14; i++){ const x = rnd() * VW, col = CUBE_COLS[i % 5], w = 6 + rnd() * 14; const st = g.createLinearGradient(0, VH * .72, 0, VH); st.addColorStop(0, col + '00'); st.addColorStop(.5, col + '40'); st.addColorStop(1, col + '00'); g.fillStyle = st; g.fillRect(x - w / 2, VH * .72, w, VH * .28); }
+  for (let i = 0; i < 26; i++){ const x = rnd() * VW, y = rnd() * VH, r = (2 + rnd() * 5) * U; const sp = g.createRadialGradient(x, y, 0, x, y, r * 3); const col = rnd() < .5 ? '255,190,90' : '160,140,255'; sp.addColorStop(0, `rgba(${col},.8)`); sp.addColorStop(1, `rgba(${col},0)`); g.fillStyle = sp; g.beginPath(); g.arc(x, y, r * 3, 0, Math.PI * 2); g.fill(); }
+  g.globalCompositeOperation = 'source-over';
+  // faint outline cubes far away, then bright cubes nearer the edges
+  for (let i = 0; i < 12; i++){ const x = rnd() * VW, y = rnd() * VH, s = (40 + rnd() * 60) * U; g.save(); g.translate(x, y); g.rotate(rnd()); g.strokeStyle = `rgba(150,130,255,${.12 + rnd() * .12})`; g.lineWidth = 3 * U; g.strokeRect(-s / 2, -s / 2, s, s); g.fillStyle = 'rgba(120,100,255,.05)'; g.fillRect(-s / 2, -s / 2, s, s); g.restore(); }
+  const spots = [[.1, .17, 150, '#ffc23d', 0], [.88, .07, 120, '#3fd0ff', 0], [.97, .2, 80, '#ff4d8a', 2], [.11, .58, 130, '#3fd0ff', 0], [.24, .68, 80, '#5ee87a', 1], [.88, .5, 150, '#ffc23d', 0], [.05, .88, 170, '#ff4d8a', 3], [.97, .72, 150, '#a46bff', 2], [.03, .35, 70, '#a46bff', 3], [.2, .27, 30, '#a46bff', 2]];
+  for (const [fx, fy, s, col, bl] of spots) glassCube(g, fx * VW, fy * VH, s * U, (rnd() - .5) * 1.1, col, .92, bl * dpr * U * 2);
+  backdrop.img = c; backdrop.w = cvs.width; backdrop.h = cvs.height;
+  return c;
+}
 function rr(x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 function shade(hex, f){ const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = n >> 8 & 255, b = n & 255; r = clamp(Math.round(r * f), 0, 255); g = clamp(Math.round(g * f), 0, 255); b = clamp(Math.round(b * f), 0, 255); return `rgb(${r},${g},${b})`; }
 // one block, in the equipped skin
@@ -423,14 +544,31 @@ function block(x, y, s, color, special, skin = save.skin, alpha = 1){
     ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(x + m + pad, y + m + pad); ctx.lineTo(x + s - m - pad, y + m + pad); ctx.lineTo(x + s - m - pad, y + s - m - pad); ctx.lineTo(x + m + pad, y + s - m - pad); ctx.fill();
     ctx.fillStyle = shade(color, 1.35); ctx.beginPath(); ctx.moveTo(x + m + pad, y + m + pad); ctx.lineTo(x + s - m - pad, y + m + pad); ctx.lineTo(cx, cy); ctx.fill();
     ctx.fillStyle = shade(color, .8); ctx.beginPath(); ctx.moveTo(x + m + pad, y + s - m - pad); ctx.lineTo(x + s - m - pad, y + s - m - pad); ctx.lineTo(cx, cy); ctx.fill();
-  } else {
-    const g = ctx.createLinearGradient(x, y, x, y + s); g.addColorStop(0, shade(color, 1.18)); g.addColorStop(1, shade(color, .78));
-    rr(x + pad, y + pad, w, w, r); ctx.fillStyle = g; ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,.32)'; rr(x + s * .16, y + s * .12, w * .62, s * .16, s * .08); ctx.fill();
-    ctx.fillStyle = 'rgba(0,0,0,.14)'; rr(x + pad, y + s * .78, w, s * .16, s * .08); ctx.fill();
-  }
+  } else if (s > 6){
+    // glossy blocks have a soft glow, which is slow to draw: paint each colour and size once, then copy it
+    const key = color + '|' + Math.round(s * dpr), m = Math.ceil(s * .45);
+    let img = glossyCache.get(key);
+    if (!img){
+      img = document.createElement('canvas'); img.width = img.height = Math.ceil((s + m * 2) * dpr);
+      const main = ctx; ctx = img.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      glossy(m, m, s, color, pad, w, r); ctx = main; glossyCache.set(key, img);
+      if (glossyCache.size > 400) glossyCache.clear();
+    }
+    ctx.drawImage(img, x - m, y - m, s + m * 2, s + m * 2);
+  } else glossy(x, y, s, color, pad, w, r);
   if (special){ ctx.font = `${Math.floor(s * .55)}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(SPECIAL_IC[special], x + s / 2, y + s / 2 + s * .03); }
   ctx.globalAlpha = 1;
+}
+const glossyCache = new Map();
+function glossy(x, y, s, color, pad, w, r){
+  {
+    ctx.shadowColor = color; ctx.shadowBlur = s * .3;
+    const g = ctx.createLinearGradient(x, y, x, y + s); g.addColorStop(0, shade(color, 1.3)); g.addColorStop(.5, color); g.addColorStop(1, shade(color, .82));
+    rr(x + pad, y + pad, w, w, r); ctx.fillStyle = g; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,.5)'; rr(x + s * .14, y + s * .1, w * .66, s * .14, s * .07); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.18)'; rr(x + pad + s * .04, y + pad + s * .04, w - s * .08, w * .45, r * .8); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.16)'; rr(x + pad, y + s * .8, w, s * .14, s * .07); ctx.fill();
+  }
 }
 function burst(r, c, color, n){
   const x = L.bx + (c + .5) * L.cs, y = L.by + (r + .5) * L.cs;
@@ -457,8 +595,9 @@ function wouldClear(p, r, c){
 
 function draw(dt){
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const bg = ctx.createLinearGradient(0, 0, 0, VH); bg.addColorStop(0, '#16123a'); bg.addColorStop(1, '#0a0817');
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, VW, VH);
+  const bgImg = backdropImg();
+  if (bgImg){ ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(bgImg, 0, 0); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  else { ctx.fillStyle = '#120e3e'; ctx.fillRect(0, 0, VW, VH); }
   if (!G) return;
   const sx = (Math.random() - .5) * G.shake, sy = (Math.random() - .5) * G.shake;
   ctx.translate(sx, sy);
@@ -468,15 +607,18 @@ function draw(dt){
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
   G.shown += (G.score - G.shown) * Math.min(1, dt * 10); if (Math.abs(G.score - G.shown) < 1) G.shown = G.score;
   if (!COVER){
-  ctx.font = `900 ${Math.round(Math.min(46, VW / 9))}px ui-rounded,system-ui,sans-serif`; ctx.fillText(fmt(Math.round(G.shown)), VW / 2, by - 50);
-  ctx.font = '800 13px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = '#a9a3cc';
-  ctx.fillText(G.daily ? `DAILY PUZZLE #${dailyNumber()}` : `BEST ${fmt(Math.max(save.best, G.score))}`, VW / 2, by - 18);
-  if (G.combo >= 2){ ctx.textAlign = 'right'; ctx.fillStyle = '#80ed99'; ctx.font = '900 15px ui-rounded,system-ui,sans-serif'; ctx.fillText(`COMBO ×${G.combo}`, bx + size, by - 18); }
+  ctx.font = `900 ${Math.round(Math.min(56, VW / 8))}px ui-rounded,system-ui,sans-serif`; ctx.shadowColor = 'rgba(160,140,255,.7)'; ctx.shadowBlur = 14; ctx.fillText(fmt(Math.round(G.shown)), VW / 2, by - Math.max(10, cs * .3) - 44); ctx.shadowBlur = 0;
+  ctx.font = '900 15px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = '#c9c0ff';
+  ctx.fillText(G.daily ? `DAILY PUZZLE #${dailyNumber()}` : `BEST ${fmt(Math.max(save.best, G.score))}`, VW / 2, by - Math.max(10, cs * .3) - 12);
+  if (G.combo >= 2){ ctx.textAlign = 'right'; ctx.fillStyle = '#80ed99'; ctx.font = '900 15px ui-rounded,system-ui,sans-serif'; ctx.fillText(`COMBO ×${G.combo}`, bx + size, by - Math.max(10, cs * .3) - 12); }
   }
 
   // board
-  rr(bx - 8, by - 8, size + 16, size + 16, 16); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fill();
-  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){ rr(bx + c * cs + 2, by + r * cs + 2, cs - 4, cs - 4, cs * .16); ctx.fillStyle = 'rgba(255,255,255,.045)'; ctx.fill(); }
+  const fr = Math.max(10, cs * .3);
+  rr(bx - fr, by - fr, size + fr * 2, size + fr * 2, fr * 1.6); ctx.fillStyle = 'rgba(12,10,40,.85)'; ctx.fill();
+  const edge = ctx.createLinearGradient(bx, by - fr, bx + size, by + size + fr); edge.addColorStop(0, '#6fd6ff'); edge.addColorStop(.45, '#8a6bff'); edge.addColorStop(.75, '#c85cff'); edge.addColorStop(1, '#ff6ad5');
+  ctx.save(); ctx.shadowColor = 'rgba(150,110,255,.9)'; ctx.shadowBlur = 22; ctx.strokeStyle = edge; ctx.lineWidth = 2.5; ctx.stroke(); ctx.restore();
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){ rr(bx + c * cs + 3, by + r * cs + 3, cs - 6, cs - 6, cs * .16); ctx.fillStyle = 'rgba(70,62,130,.45)'; ctx.fill(); ctx.strokeStyle = 'rgba(160,150,255,.12)'; ctx.lineWidth = 1; ctx.stroke(); }
 
   // ghost + lines that would clear
   const tgt = dragTarget();
@@ -529,7 +671,7 @@ function draw(dt){
   if (G.banner){
     const b = G.banner; b.life -= dt; const k = clamp(b.life, 0, 1), pop = 1 + Math.max(0, b.life - 1) * .6;
     ctx.globalAlpha = k; ctx.font = `900 ${Math.round(Math.min(56, VW / 7) * pop)}px ui-rounded,system-ui,sans-serif`;
-    ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillText(b.text, VW / 2 + 3, by + size / 2 + 3); ctx.fillStyle = b.c; ctx.fillText(b.text, VW / 2, by + size / 2);
+    ctx.lineJoin = 'round'; ctx.lineWidth = 8; ctx.strokeStyle = 'rgba(20,12,60,.85)'; ctx.strokeText(b.text, VW / 2, by + size / 2); ctx.shadowColor = b.c; ctx.shadowBlur = 20; ctx.fillStyle = b.c; ctx.fillText(b.text, VW / 2, by + size / 2); ctx.shadowBlur = 0;
     ctx.globalAlpha = 1; if (b.life <= 0) G.banner = null;
   }
   if (G.flash > 0){ ctx.fillStyle = `rgba(255,255,255,${G.flash * .3})`; ctx.fillRect(-20, -20, VW + 40, VH + 40); G.flash = Math.max(0, G.flash - dt * 1.5); }
@@ -569,7 +711,6 @@ function show(id){
 function refreshSwap(){
   if (!G) return;
   // one free swap per game; portals don't allow ad buttons on the play screen, so it simply goes away once used
-  $('swapBtn').textContent = '🔄 Swap pieces (1 free)';
   $('swapBtn').style.display = G.freeSwap ? '' : 'none';
 }
 function refreshMenu(){
@@ -577,8 +718,10 @@ function refreshMenu(){
   const y = dayKey(new Date(Date.now() - 864e5));
   $('mStreak').textContent = (save.lastDaily === dayKey() || save.lastDaily === y) ? save.streak : 0;
   const d = save.daily[dayKey()];
-  $('dailyBtn').innerHTML = `Daily Puzzle #${dailyNumber()}<small>${d ? 'Today: ' + fmt(d.score) + ' · play again to beat it' : 'Same pieces for everyone today'}</small>`;
-  $('muteBtn').textContent = 'Sound: ' + (save.muted ? 'off' : 'on');
+  $('dName').textContent = `Daily Puzzle #${dailyNumber()}`;
+  $('dSubM').textContent = d ? 'Today: ' + fmt(d.score) + ' · play again to beat it' : 'Same pieces for everyone today';
+  $('muteTx').textContent = 'Sound: ' + (save.muted ? 'off' : 'on');
+  $('muteIco').setAttribute('href', save.muted ? '#i-mute' : '#i-sound');
 }
 function startGame(daily = false){ Sound.init(); newGame(daily); screen = 'play'; show(null); Portal.gameplayStart(); }
 function gemsFor(){ return Math.floor(G.score / 150) + G.flushes * 2; }
@@ -596,11 +739,11 @@ function showOver(){
   persist();
   $('oTitle').textContent = 'No more room';
   $('oScore').textContent = fmt(G.score);
-  $('oBest').textContent = best ? 'New best!' : 'Best ' + fmt(save.best);
+  $('oBest').textContent = best ? 'New best!' : 'Best ' + fmt(save.best); $('oBest').className = 'best' + (best ? ' new' : '');
   $('oLines').textContent = G.lines; $('oFlush').textContent = G.flushes; $('oCombo').textContent = '×' + G.bestCombo;
-  $('oGems').textContent = `+${gems} 💎 gems`;
-  $('reviveBtn').style.display = G.revived ? 'none' : 'block';
-  $('shareBtn').style.display = G.daily ? 'block' : 'none';
+  $('oGems').innerHTML = `<span>+${gems} <svg><use href="#i-gem"/></svg> gems</span>`;
+  $('reviveBtn').style.display = G.revived ? 'none' : 'flex';
+  $('shareBtn').style.display = G.daily ? 'flex' : 'none';
   show('over');
 }
 // revive: every tile of your most common colour bursts
@@ -634,14 +777,16 @@ function renderSkins(){
   for (const s of SKINS){
     const owned = save.owned.includes(s.id);
     const b = document.createElement('button'); b.className = 'skin' + (save.skin === s.id ? ' eq' : '');
-    const cv = document.createElement('canvas'); cv.width = 128; cv.height = 80; b.appendChild(cv);
-    b.insertAdjacentHTML('beforeend', `${s.name}<div class="c">${save.skin === s.id ? 'Equipped' : owned ? 'Tap to use' : '💎 ' + s.cost}</div>`);
+    const cv = document.createElement('canvas'); cv.width = 340; cv.height = 180;   // room around the blocks so their glow fades out instead of being cut off
+    b.insertAdjacentHTML('beforeend', `${s.name}<br><div class="c">${save.skin === s.id ? 'Equipped' : owned ? 'Tap to use' : '<svg><use href="#i-gem"/></svg>' + s.cost}</div>`);
     // draw a little preview with the real block renderer
-    const main = ctx; ctx = cv.getContext('2d'); [0, 1, 2].forEach(k => block(4 + k * 40, 20, 40, COLORS[k + 1], null, s.id)); ctx = main;
+    const main = ctx; ctx = cv.getContext('2d'); [1, 2, 3].forEach((ci, k) => block(50 + k * 82, 50, 80, COLORS[s.id === 'gem' && k === 2 ? 0 : ci], null, s.id)); ctx = main;
+    // shown as a CSS background: a canvas or <img> inside the glass card composites as a dark box
+    const pv = document.createElement('div'); pv.className = 'pv'; pv.style.backgroundImage = `url(${cv.toDataURL()})`; b.prepend(pv);
     b.onclick = () => {
       if (owned) save.skin = s.id;
       else if (save.gems >= s.cost){ save.gems -= s.cost; save.owned.push(s.id); save.skin = s.id; Sound.init(); Sound.flush(); }
-      else { toast(`Need ${s.cost - save.gems} more 💎`); return; }
+      else { toast(`Need ${s.cost - save.gems} more gems`); return; }
       persist(); renderSkins();
     };
     box.appendChild(b);

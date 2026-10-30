@@ -106,6 +106,54 @@
   #bar button{white-space:nowrap}
   @media (max-width:430px){ #bar{gap:8px;padding:0 10px} #bar button{padding:9px 14px;font-size:15px;gap:8px} #bar button svg{width:20px;height:20px} }
   @media (max-height:780px){ .card{padding:18px 18px 14px} .tag{margin:6px 0 10px} .btn{margin-top:8px;padding:11px 14px} .btn.primary{padding:12px;font-size:24px} .big{font-size:76px} .how{padding:8px 14px;font-size:14px} .how div{margin-top:1px} .stats{margin-top:10px;padding:8px 4px} }
+  /* daily missions */
+  .missions{margin-top:12px;padding:10px 14px 8px;border-radius:18px;background:rgba(8,6,30,.55);border:1px solid rgba(150,140,255,.22);text-align:left}
+  .missions h3{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:16px;font-weight:900;color:#fff;margin-bottom:2px}
+  .missions h3 span{display:inline-flex;align-items:center;gap:4px;font-size:13px;color:#ffc23d;font-weight:800;white-space:nowrap}
+  .missions h3 svg{width:16px;height:16px}
+  .mrow{display:flex;align-items:center;gap:10px;padding:5px 0}
+  .mrow .ck{width:24px;height:24px;border-radius:50%;border:2px solid rgba(160,150,255,.5);flex:none;display:grid;place-items:center;color:#0d3a1c}
+  .mrow .ck svg{width:14px;height:14px}
+  .mrow.done .ck{background:linear-gradient(180deg,#8bff9e,#4ee27a);border-color:#c8ffd2}
+  .mrow .mt{flex:1;min-width:0;font-size:14.5px;color:#e6e1ff;font-weight:700;line-height:1.25}
+  .mrow .bar{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.12);margin-top:4px;overflow:hidden}
+  .mrow .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#3fd0ff,#c85cff)}
+  .mrow .rw{font-size:14px;font-weight:900;color:#ffc23d;display:flex;align-items:center;gap:3px;white-space:nowrap}
+  .mrow .rw svg{width:16px;height:16px}
+  .mrow.done .mt{color:#9de8ae}.mrow.done .rw{color:#8bff9e}
+  .mmini{margin-top:10px;padding:4px 12px;border-radius:14px;background:rgba(8,6,30,.45);border:1px solid rgba(150,140,255,.18);text-align:left}
+  .mrow.sm{padding:3px 0;gap:8px}.mrow.sm .ck{width:18px;height:18px;border-width:1.5px}.mrow.sm .ck svg{width:11px;height:11px}.mrow.sm .mt{font-size:13px}.mrow.sm .rw{font-size:12.5px;color:#c9c0ff}
+  .mrow.sm.done .rw{color:#8bff9e}
+  #mpop{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translate(-50%,-160%);z-index:7;display:flex;align-items:center;gap:8px;max-width:calc(100vw - 20px);padding:9px 16px;border-radius:999px;background:linear-gradient(180deg,rgba(40,34,96,.96),rgba(18,15,50,.97));border:1.5px solid #ffc23d;box-shadow:0 0 18px rgba(255,180,60,.45),0 8px 24px rgba(0,0,0,.4);font-weight:800;font-size:15px;white-space:nowrap;transition:transform .4s cubic-bezier(.2,1.4,.4,1);pointer-events:none}
+  #mpop.on{transform:translate(-50%,0)}
+  #mpop>svg{width:20px;height:20px;flex:none;color:#4ee27a}
+  #mpop b{display:inline-flex;align-items:center;gap:3px;color:#ffc23d;margin-left:4px}
+  #mpop b svg{width:17px;height:17px}
+  @media (max-width:430px){ #mpop{font-size:13px;padding:8px 12px} }
+  /* adventure map */
+  #map .card{max-width:440px;display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px)}
+  #mapSub{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:15px}
+  #mapSub svg{width:20px;height:20px}
+  .mapwrap{position:relative;flex:1;min-height:220px;overflow-y:auto;margin:12px -4px 0;border-radius:20px;background:rgba(8,6,30,.5);border:1px solid rgba(150,140,255,.22);overscroll-behavior:contain;touch-action:pan-y}
+  .mapin{position:relative}
+  .mapin svg.path{position:absolute;left:0;top:0;pointer-events:none}
+  .node{position:absolute;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:15px;font-weight:900;font-size:21px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25);
+    box-shadow:inset 0 3px 0 rgba(255,255,255,.55),inset 0 -4px 0 rgba(0,0,0,.18),0 0 16px var(--c);display:grid;place-items:center;transition:transform .1s}
+  .node:active{transform:scale(.93)}
+  .node.lock{background:rgba(60,52,120,.55)!important;box-shadow:inset 0 0 0 1.5px rgba(160,150,255,.25);color:rgba(255,255,255,.4);cursor:default}
+  .node.lock svg{width:22px;height:22px}
+  .node.cur{outline:3px solid #fff;outline-offset:4px;animation:nodePulse 1.3s ease-in-out infinite}
+  @keyframes nodePulse{50%{transform:scale(1.09)}}
+  .node .st{position:absolute;left:50%;top:58px;transform:translateX(-50%);font-size:13px;letter-spacing:-1px;color:#ffc23d;white-space:nowrap;text-shadow:0 0 6px rgba(255,180,60,.6)}
+  .node .st i{font-style:normal;color:rgba(255,255,255,.22);text-shadow:none}
+  #mapBack{flex:none}
+  /* level end */
+  .stars{display:flex;justify-content:center;align-items:flex-end;gap:4px;margin:6px 0 2px;min-height:0}
+  .stars svg{width:54px;height:54px;filter:drop-shadow(0 0 10px rgba(255,190,60,.5))}
+  .stars svg:nth-child(2){width:70px;height:70px}
+  #leTitle{font-size:56px;margin-bottom:4px}
+  @media (max-width:430px){ #leTitle{font-size:44px} }
+  @media (max-height:780px){ #leTitle{font-size:46px} .stars svg{width:44px;height:44px} .stars svg:nth-child(2){width:56px;height:56px} .missions{padding:8px 12px 6px} .mrow{padding:3px 0} }
 </style>
 </head>
 <body>
@@ -131,6 +179,12 @@
   <symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 3l4 2 4-2 6 4-3 4-2-1v11H7V10l-2 1-3-4z" fill="url(#g-shirt)"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M2.5 11.5L12 3l9.5 8.5" fill="none" stroke="#7ae0ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10.2V21h5v-6h4v6h5V10.2L12 4z" fill="url(#g-home)"/></symbol>
   <symbol id="i-swap" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" fill="#2a8bff"/><path d="M7 9h9l-2.5-2.5M17 15H8l2.5 2.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-map" viewBox="0 0 40 40"><path d="M4 9l10-4 12 4 10-4v26l-10 4-12-4-10 4z" fill="url(#g-cal)"/><path d="M14 5v26M26 9v26" stroke="#3a2f9a" stroke-width="1.4" opacity=".6"/><path d="M8 27c4-1 4-7 9-8s7 4 10 2 3-7 6-9" fill="none" stroke="#ffd36b" stroke-width="2.4" stroke-dasharray="1 3.4" stroke-linecap="round"/><circle cx="33" cy="12" r="3" fill="#ff4d8a" stroke="#fff" stroke-width="1.2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="url(#g-gold)" stroke="#e08a0c" stroke-width=".8" stroke-linejoin="round"/><path d="M9 8.6l1.4-2.9" stroke="#fff" stroke-width="1.2" stroke-linecap="round" opacity=".7"/></symbol>
+  <symbol id="i-staroff" viewBox="0 0 24 24"><path d="M12 2.2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="rgba(255,255,255,.08)" stroke="rgba(200,190,255,.4)" stroke-width="1" stroke-linejoin="round"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+  <symbol id="i-check2" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-again" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><path d="M19.8 3.5v4.8H15" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><g fill="#e8e4ff"><rect x="3" y="5" width="18" height="2.6" rx="1.3"/><rect x="3" y="10.7" width="18" height="2.6" rx="1.3"/><rect x="3" y="16.4" width="18" height="2.6" rx="1.3"/></g></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="18" cy="5.5" r="3.2"/><circle cx="6" cy="12" r="3.2"/><circle cx="18" cy="18.5" r="3.2"/></g><path d="M8.8 10.6l6.4-3.6M8.8 13.4l6.4 3.6" stroke="currentColor" stroke-width="2.2"/></symbol>
 </svg>
@@ -142,9 +196,11 @@
   <h1 class="logo"><i class="gem-t" style="left:.12em;top:.02em;background:#ffc23d;color:#ffc23d"></i><i class="gem-t" style="left:0;top:.62em;background:#ff4d8a;color:#ff4d8a;width:.26em;height:.26em"></i><span class="p1">PRISM</span> <span class="p2">POP</span><i class="gem-t" style="right:.12em;top:.02em;background:#4cdcff;color:#4cdcff;transform:rotate(-24deg)"></i><i class="gem-t" style="right:0;top:.62em;background:#6cf08a;color:#6cf08a;width:.26em;height:.26em"></i></h1>
   <p class="tag">Drop blocks. Clear lines. Chain the bombs.</p>
   <button class="btn primary" id="playBtn"><svg><use href="#i-play"/></svg>Play</button>
+  <button class="btn list" id="advBtn"><svg style="width:44px;height:44px"><use href="#i-map"/></svg><span class="tx"><span>Adventure</span><small id="advSub">100 levels with goals</small></span><svg class="chev"><use href="#i-chev"/></svg></button>
   <button class="btn list" id="dailyBtn"><svg style="width:44px;height:44px"><use href="#i-cal"/></svg><span class="tx"><span id="dName">Daily Puzzle</span><small id="dSubM">Same pieces for everyone today</small></span><svg class="chev"><use href="#i-chev"/></svg></button>
   <button class="btn list" id="skinsBtn"><span class="mini" id="miniSkin"><i style="background:#ffc23d"></i><i style="background:#3fd0ff"></i><i style="background:#5ee87a"></i></span><span class="tx" style="text-align:center">Block skins</span><svg class="chev"><use href="#i-chev"/></svg></button>
   <div class="stats"><div><b><span id="mBest">0</span><svg><use href="#i-crown"/></svg></b>best</div><div><b><span id="mGems">0</span><svg><use href="#i-gem"/></svg></b>gems</div><div><b><span id="mStreak">0</span><svg><use href="#i-flame"/></svg></b>day streak</div></div>
+  <div class="missions" id="mList"></div>
   <div class="how">
     <b>Fill a row or column</b> to clear it.
     <div><span>🟣</span><span style="font-size:inherit;width:auto;text-align:left"><b>Flush:</b> clear a line that is all one colour for ×3 points.</span></div>
@@ -161,6 +217,7 @@
   <div class="big" id="oScore">0</div>
   <div class="best" id="oBest"></div>
   <div class="stats"><div><b id="oLines">0</b>lines</div><div><b id="oFlush">0</b>flushes</div><div><b id="oCombo">0</b>best combo</div></div>
+  <div class="mmini" id="oMis"></div>
   <button class="btn ad" id="reviveBtn"><svg><use href="#i-tv"/></svg><span class="tx"><span style="font-size:20px">Prism Blast: keep going</span><small>Watch a short ad · clears every tile of your most common colour</small></span></button>
   <button class="btn primary" id="againBtn" style="font-size:24px"><svg><use href="#i-play"/></svg>Play again</button>
   <button class="btn" id="shareBtn"><svg><use href="#i-share"/></svg>Share</button>
@@ -174,6 +231,27 @@
   <div class="skins" id="skinList"></div>
   <button class="btn" id="sBackBtn"><svg><use href="#i-back"/></svg>Back</button>
 </div></div>
+
+<div id="map" class="screen"><div class="card">
+  <h2 class="logo" style="font-size:clamp(36px,10vw,46px)"><i class="gem-t" style="left:.12em;top:.02em;background:#ffc23d;color:#ffc23d"></i><i class="gem-t" style="left:0;top:.62em;background:#ff4d8a;color:#ff4d8a;width:.26em;height:.26em"></i><span class="p1">Adven</span><span class="p2">ture</span><i class="gem-t" style="right:.12em;top:.02em;background:#4cdcff;color:#4cdcff;transform:rotate(-24deg)"></i><i class="gem-t" style="right:0;top:.62em;background:#6cf08a;color:#6cf08a;width:.26em;height:.26em"></i></h2>
+  <div class="sub" id="mapSub"></div>
+  <div class="mapwrap" id="mapWrap"><div class="mapin" id="mapIn"></div></div>
+  <button class="btn" id="mapBack"><svg><use href="#i-back"/></svg>Back</button>
+</div></div>
+
+<div id="lvend" class="screen"><div class="card">
+  <div class="confetti" id="leConf"><i style="left:16%;top:30px;background:#ffc23d"></i><i style="left:10%;top:84px;background:#ff4d8a;width:18px;height:18px;transform:rotate(-20deg)"></i><i style="right:16%;top:30px;background:#4cdcff;transform:rotate(-30deg)"></i><i style="right:10%;top:84px;background:#6cf08a;width:18px;height:18px"></i></div>
+  <div class="sub" id="leSub">Level 1</div>
+  <div class="big" id="leTitle">Complete!</div>
+  <div class="stars" id="leStars"></div>
+  <div class="sub" id="leGoal" style="font-size:16px"></div>
+  <button class="btn ad" id="leCont"><svg><use href="#i-tv"/></svg><span class="tx"><span id="leContT" style="font-size:20px">+5 moves: keep going</span><small id="leContS">Watch a short ad</small></span></button>
+  <button class="btn primary" id="leNext" style="font-size:24px"><svg><use href="#i-play"/></svg><span id="leNextT">Next level</span></button>
+  <div class="row"><button class="btn" id="leRetry"><svg><use href="#i-again"/></svg>Replay</button><button class="btn" id="leMap"><svg style="width:30px;height:30px"><use href="#i-map"/></svg>Map</button></div>
+  <div class="mmini" id="leMis"></div>
+  <div class="foot" id="leGems"></div>
+</div></div>
+<div id="mpop"></div>
 
 <div id="ad"><div class="t">AD PLACEHOLDER</div><div class="n" id="adN">3</div><div class="t">A portal ad (CrazyGames / Poki) plays here</div></div>
 <div id="toast"></div>
@@ -352,24 +430,278 @@ if (save.tut === undefined){ save.tut = (save.games || save.best) ? 'done' : 'ne
 const tutOn = () => save.tut === 'new';
 function tipDone(k){ save['tip_' + k] = 1; if (save.tip_drag && save.tip_special && save.tip_flush) save.tut = 'done'; persist(); }
 
+/* ================= Daily missions and the daily bonus ================= */
+// three missions a day, the same three for everyone, picked from this pool by the date
+const MISSIONS = [
+  { id: 'lines20',  t: 'Clear 20 lines',             k: 'lines',      n: 20,   g: 6 },
+  { id: 'lines40',  t: 'Clear 40 lines',             k: 'lines',      n: 40,   g: 10 },
+  { id: 'score1k',  t: 'Score 1,000 in one game',    k: 'bestGame',   n: 1000, g: 8,  max: 1 },
+  { id: 'score25',  t: 'Score 2,500 in one game',    k: 'bestGame',   n: 2500, g: 12, max: 1 },
+  { id: 'flush1',   t: 'Get a Flush',                k: 'flushes',    n: 1,    g: 6 },
+  { id: 'flush3',   t: 'Get 3 Flushes',              k: 'flushes',    n: 3,    g: 12 },
+  { id: 'combo3',   t: 'Reach a ×3 combo',           k: 'combo',      n: 3,    g: 8,  max: 1 },
+  { id: 'bombs3',   t: 'Set off 3 bombs',            k: 'bombs',      n: 3,    g: 8 },
+  { id: 'bolt2',    t: 'Set off 2 lightning tiles',  k: 'bolts',      n: 2,    g: 8 },
+  { id: 'adv2',     t: 'Beat 2 Adventure levels',    k: 'advWins',    n: 2,    g: 10 },
+  { id: 'stars6',   t: 'Earn 6 Adventure stars',     k: 'stars',      n: 6,    g: 10 },
+  { id: 'daily',    t: 'Play the Daily Puzzle',      k: 'dailyPlays', n: 1,    g: 6 },
+  { id: 'pieces80', t: 'Place 80 pieces',            k: 'pieces',     n: 80,   g: 6 },
+];
+const MISSION_BY = Object.fromEntries(MISSIONS.map(m => [m.id, m]));
+const LOGIN_GEMS = [3, 4, 5, 6, 8, 10, 12];
+if (!save.adv) save.adv = { top: 1, stars: {} };
+function missionsToday(){
+  const day = dayKey();
+  if (!save.mis || save.mis.day !== day){
+    const r = mulberry32((dailyNumber() * 7907 + 11) >>> 0), ids = [], keys = new Set();
+    while (ids.length < 3){ const m = MISSIONS[Math.floor(r() * MISSIONS.length)]; if (keys.has(m.k)) continue; keys.add(m.k); ids.push(m.id); }
+    save.mis = { day, ids, prog: {}, done: [] };
+  }
+  return save.mis;
+}
+// count something toward today's missions; finished ones pay out straight away
+function mStat(k, v, isMax = false){
+  if (!v) return;
+  const ms = missionsToday(); let changed = false;
+  if (!ms.ids.some(id => MISSION_BY[id].k === k && !ms.done.includes(id))) return;
+  ms.prog[k] = isMax ? Math.max(ms.prog[k] || 0, v) : (ms.prog[k] || 0) + v;
+  for (const id of ms.ids){
+    const m = MISSION_BY[id]; if (m.k !== k || ms.done.includes(id) || ms.prog[k] < m.n) continue;
+    ms.done.push(id); save.gems += m.g; changed = true;
+    popMsg(`<svg><use href="#i-check2"/></svg>Mission complete: ${m.t}`, `+${m.g}`);
+    Sound.init(); Sound.flush && Sound.flush();
+  }
+  persist();
+  if (changed && screen === 'menu') refreshMenu();
+}
+// the daily bonus: first open of each day pays gems, growing for 7 days in a row
+function dailyBonus(){
+  const today = dayKey(), y = dayKey(new Date(Date.now() - 864e5)), L = save.login || {};
+  if (L.last === today) return;
+  const n = L.last === y ? (L.n || 0) + 1 : 1, g = LOGIN_GEMS[Math.min(n, 7) - 1];
+  save.login = { last: today, n }; save.gems += g; persist();
+  setTimeout(() => popMsg(`<svg><use href="#i-flame"/></svg>Daily bonus · day ${n}`, `+${g}`), 700);
+}
+// a little glass pill that slides down from the top, one message at a time
+const popQ = [];
+function popMsg(html, gems){
+  if (COVER) return;
+  popQ.push({ html, gems }); if (popQ.length === 1) popNext();
+}
+function popNext(){
+  const p = popQ[0]; if (!p) return;
+  const el = $('mpop'); el.innerHTML = `${p.html}<b>${p.gems}<svg><use href="#i-gem"/></svg></b>`; el.classList.add('on');
+  setTimeout(() => { el.classList.remove('on'); setTimeout(() => { popQ.shift(); popNext(); }, 380); }, 2600);
+}
+function renderMissions(el, compact){
+  const ms = missionsToday();
+  const check = '<svg><use href="#i-check2"/></svg>';
+  let h = compact ? '' : `<h3>Daily missions<span><svg><use href="#i-flame"/></svg>Daily bonus · day ${(save.login && save.login.n) || 1}</span></h3>`;
+  for (const id of ms.ids){
+    const m = MISSION_BY[id], done = ms.done.includes(id), v = Math.min(ms.prog[m.k] || 0, m.n);
+    const num = m.n >= 1000 ? `${fmt(v)}/${fmt(m.n)}` : `${v}/${m.n}`;
+    if (compact) h += `<div class="mrow sm${done ? ' done' : ''}"><span class="ck">${done ? check : ''}</span><span class="mt">${m.t}</span><span class="rw">${done ? 'Done' : num}</span></div>`;
+    else h += `<div class="mrow${done ? ' done' : ''}"><span class="ck">${done ? check : ''}</span><span class="mt">${m.t}<span class="bar"><i style="width:${v / m.n * 100}%"></i></span></span><span class="rw">${done ? 'Done' : `+${m.g}<svg><use href="#i-gem"/></svg>`}</span></div>`;
+  }
+  $(el).innerHTML = h;
+}
+
+/* ================= Adventure: 100 levels with goals ================= */
+const LEVELS_N = 100;
+const COLOR_NAMES = ['pink', 'yellow', 'blue', 'green'];
+// the first fifteen teach one idea at a time
+const HAND = [
+  { goal: { t: 'lines', n: 3 } },
+  { goal: { t: 'lines', n: 5 } },
+  { goal: { t: 'score', n: 300 } },
+  { goal: { t: 'color', n: 8, c: 0 } },
+  { goal: { t: 'lines', n: 6 }, junk: 6 },
+  { goal: { t: 'flush', n: 1 }, flushRows: 2 },
+  { goal: { t: 'bomb', n: 1 }, spec: .3, specType: 'bomb' },
+  { goal: { t: 'ice', n: 4 }, ice: 4 },
+  { goal: { t: 'lines', n: 8 }, junk: 4 },
+  { goal: { t: 'score', n: 500 } },
+  { goal: { t: 'color', n: 10, c: 2 }, junk: 4 },
+  { goal: { t: 'bolt', n: 2 }, spec: .3, specType: 'bolt' },
+  { goal: { t: 'ice', n: 6 }, ice: 6, junk: 2 },
+  { goal: { t: 'flush', n: 2 }, flushRows: 3, spec: .2, specType: 'prism' },
+  { goal: { t: 'lines', n: 10 }, junk: 8 },
+];
+// move limits, tuned with a bot (see the report in the commit message)
+const MOVES = [16,25,29,25,22,6,17,46,31,50,40,13,45,61,40,23,29,32,33,6,32,26,8,14,55,44,6,27,11,38,41,8,20,30,13,32,43,39,11,29,14,38,49,6,29,35,20,25,47,44,6,32,21,53,43,53,18,35,14,23,51,44,52,35,23,38,33,8,18,38,34,32,38,53,12,35,21,32,47,27,20,36,27,26,32,53,39,45,19,56,53,21,26,37,20,20,41,45,6,46];
+function levelDef(n, movesOverride){
+  const r = mulberry32(((n * 2654435761) ^ 0x9e3779b9) >>> 0);
+  let d;
+  if (n <= HAND.length) d = Object.assign({ junk: 0, ice: 0, flushRows: 0, spec: .1, specType: null, hard: .05 + n * .01 }, HAND[n - 1]);
+  else {
+    const k = (n - 16) / (LEVELS_N - 16);
+    const kinds = ['lines', 'color', 'ice', 'score', 'flush', 'bomb', 'lines', 'bolt', 'color', 'ice', 'score', 'flush'];
+    const t = kinds[(n - 16) % kinds.length];
+    d = { junk: Math.round(3 + k * 11 + r() * 3), ice: 0, flushRows: 0, spec: .1, specType: null, hard: .2 + k * .7 };
+    if (t === 'lines') d.goal = { t, n: 8 + Math.round(k * 10) };
+    if (t === 'color') d.goal = { t, n: 10 + Math.round(k * 10), c: Math.floor(r() * 4) };
+    if (t === 'ice'){ d.ice = 5 + Math.round(k * 9); d.goal = { t, n: d.ice }; d.junk = Math.round(d.junk * .5); }
+    if (t === 'score') d.goal = { t, n: Math.round((500 + k * 1000) / 50) * 50 };
+    if (t === 'flush'){ d.goal = { t, n: k > .45 ? 2 : 1 }; d.flushRows = 3; d.junk = 0; d.hard = Math.min(d.hard, .25); d.spec = .22; d.specType = 'prism'; }   // rainbow tiles count as any colour
+    if (t === 'bomb' || t === 'bolt'){ d.goal = { t, n: 2 + Math.round(k * 2) }; d.spec = .28; d.specType = t; }
+  }
+  d.n = n; d.moves = movesOverride || MOVES[n - 1] || 60;
+  d.seed = ((n * 2246822519) ^ 0x85ebca6b) >>> 0;
+  d.pre = buildPre(d, r);
+  return d;
+}
+// the starting tiles: the same for everyone, and never a full line
+function buildPre(d, r){
+  const g = Array.from({ length: N }, () => Array(N).fill(null)), out = [];
+  const rowN = i => g[i].filter(Boolean).length, colN = j => g.reduce((a, row) => a + (row[j] ? 1 : 0), 0);
+  // nearly-finished one-colour rows to aim a Flush at
+  [7, 6, 5].slice(0, d.flushRows).forEach(row => {      // stacked at the bottom, so the top of the board stays open for big pieces
+    const c = Math.floor(r() * 4), gaps = new Set(); while (gaps.size < 2) gaps.add(Math.floor(r() * N));
+    for (let j = 0; j < N; j++) if (!gaps.has(j)){ g[row][j] = { color: c }; out.push({ r: row, c: j, color: c }); }
+  });
+  const put = (count, ice) => {
+    let tries = 0;
+    while (count > 0 && tries++ < 500){
+      const i = Math.floor(r() * N), j = Math.floor(r() * N);
+      if (g[i][j] || rowN(i) >= N - 2 || colN(j) >= N - 2) continue;
+      g[i][j] = { color: Math.floor(r() * 4), ice }; out.push({ r: i, c: j, color: g[i][j].color, ice }); count--;
+    }
+  };
+  put(d.ice, true); put(d.junk, false);
+  return out;
+}
+const GOAL_TX = g => ({ lines: `Clear ${g.n} lines`, score: `Score ${fmt(g.n)}`, color: `Clear ${g.n} ${COLOR_NAMES[g.c]} tiles`,
+  flush: g.n > 1 ? `Get ${g.n} Flushes` : 'Get a Flush', bomb: g.n > 1 ? `Set off ${g.n} bombs` : 'Set off a bomb',
+  bolt: `Set off ${g.n} lightning tiles`, ice: `Break all ${g.n} ice tiles` })[g.t];
+const GOAL_SHORT = g => g.t === 'color' ? `${COLOR_NAMES[g.c].toUpperCase()} TILES` : g.t === 'score' ? `SCORE ${fmt(g.n)}` : ({ lines: 'LINES', flush: 'FLUSHES', bomb: 'BOMBS', bolt: 'LIGHTNING', ice: 'ICE TILES' })[g.t];
+function advProg(){
+  if (!G || !G.adv) return 0;
+  const g = G.adv.def.goal;
+  return { lines: G.lines, score: G.score, color: G.cnt.colors[g.c], flush: G.flushes, bomb: G.cnt.bomb, bolt: G.cnt.bolt, ice: G.cnt.ice }[g.t] || 0;
+}
+// after each move: won, or out of moves?
+function advCheck(){
+  const a = G.adv; if (!a || G.over) return false;
+  if (advProg() >= a.def.goal.n){ advEnd(true); return true; }
+  if (a.left <= 0){ advEnd(false, 'Out of moves'); return true; }
+  return false;
+}
+function advEnd(win, reason){
+  const a = G.adv, g0 = G;
+  G.over = true; Portal.gameplayStop();
+  const frac = a.left / a.def.moves;
+  a.result = { win, reason, stars: win ? (frac >= .3 ? 3 : frac >= .12 ? 2 : 1) : 0 };
+  if (win){ G.banner = { text: 'LEVEL COMPLETE!', life: 1.6, c: '#ffc23d', big: 1 }; Sound.perfect(); G.slow = .7; G.flash = .4; buzz([30, 50, 90]); }
+  else { G.slow = .9; G.endT = 0; buzz([40, 80, 120]); }
+  setTimeout(() => { if (G === g0 && G.adv === a) showLevelEnd(); }, win ? 1300 : 900);
+}
+function showLevelEnd(){
+  const a = G.adv, d = a.def, res = a.result, win = res.win;
+  screen = 'lvend'; Sound.over && !win && Sound.over();
+  let gems = 0;
+  if (win){
+    const prev = save.adv.stars[d.n] || 0;
+    if (res.stars > prev){ gems = prev ? (res.stars - prev) * 2 : 3 + res.stars * 2 + Math.floor(d.n / 10); save.adv.stars[d.n] = res.stars; }
+    save.adv.top = Math.max(save.adv.top, Math.min(LEVELS_N, d.n + 1));
+    save.gems += gems;
+  }
+  save.games++; persist();
+  if (win){ mStat('advWins', 1); mStat('stars', res.stars); }
+  mStat('games', 1);
+  const prog = Math.min(advProg(), d.goal.n), pt = d.goal.t === 'score' ? `${fmt(prog)} of ${fmt(d.goal.n)}` : `${prog} of ${d.goal.n}`;
+  $('leSub').textContent = `Level ${d.n}`;
+  $('leTitle').textContent = win ? 'Complete!' : res.reason;
+  $('leStars').innerHTML = win ? [1, 2, 3].map(k => `<svg><use href="#${k <= res.stars ? 'i-star' : 'i-staroff'}"/></svg>`).join('') : '';
+  $('leGoal').textContent = win ? `${GOAL_TX(d.goal)} · ${a.left} move${a.left === 1 ? '' : 's'} left` : `${GOAL_TX(d.goal)}: ${pt}`;
+  $('leConf').style.display = win ? '' : 'none';
+  $('leCont').style.display = !win && !a.cont ? 'flex' : 'none';
+  $('leContT').textContent = res.reason === 'Out of moves' ? '+5 moves: keep going' : 'Prism Blast: keep going';
+  $('leContS').textContent = res.reason === 'Out of moves' ? 'Watch a short ad' : 'Watch a short ad · clears your most common colour';
+  $('leNextT').textContent = win ? (d.n < LEVELS_N ? 'Next level' : 'Back to the map') : 'Try again';
+  $('leRetry').style.display = win ? 'flex' : 'none';
+  $('leGems').innerHTML = win && gems ? `<span>+${gems} <svg><use href="#i-gem"/></svg> gems</span>` : '';
+  renderMissions('leMis', true);
+  show('lvend');
+}
+// clear every tile of the most common colour (the rewarded continue)
+function prismBlast(){
+  const counts = Array(COLORS.length).fill(0); G.grid.forEach(row => row.forEach(t => { if (t) counts[t.color]++; }));
+  const col = counts.indexOf(Math.max(...counts));
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){ const t = G.grid[r][c]; if (t && t.color === col){ G.fx.push({ type: 'tile', r, c, color: col, life: .5 }); burst(r, c, COLORS[col], 6); if (t.ice && G.cnt) G.cnt.ice++; if (G.cnt) G.cnt.colors[col]++; G.grid[r][c] = null; } }
+  G.banner = { text: 'PRISM BLAST!', life: 1.5, c: COLORS[col] }; Sound.flush(); G.flash = .5;
+  if (!G.tray.some(t => t && fitsAnywhere(t))) refill();
+}
+async function advContinue(){
+  const a = G && G.adv; if (!a || a.cont || !a.result || a.result.win) return;
+  if (!(await Portal.rewarded())) return;
+  a.cont = true; G.over = false; G.slow = 0; G.endT = 0;
+  if (a.result.reason === 'Out of moves') a.left += 5; else prismBlast();
+  a.result = null;
+  screen = 'play'; show(null); Portal.gameplayStart();
+  if (advCheck()) return;
+}
+async function betweenGamesAd(){ gamesSinceAd++; if (gamesSinceAd >= 3){ gamesSinceAd = 0; await Portal.interstitial(); } }
+function startLevel(n, quiet = false, movesOverride){
+  if (!quiet) Sound.init();
+  newGame(false, n, movesOverride); G.intro = COVER ? 0 : 2.4; screen = 'play'; show(null); Portal.gameplayStart();
+}
+function openMap(){
+  const top = save.adv.top, H = LEVELS_N * 80 + 70, pts = [];
+  let html = '';
+  for (let i = 1; i <= LEVELS_N; i++){
+    const x = 50 + Math.sin(i * .78) * 30, y = (LEVELS_N - i) * 80 + 46, st = save.adv.stars[i] || 0, lock = i > top;
+    pts.push(`${x.toFixed(2)},${y}`);
+    const col = COLORS[(i - 1) % 4];
+    html += `<button class="node${lock ? ' lock' : ''}${i === top ? ' cur' : ''}" data-l="${i}" style="left:${x}%;top:${y}px;--c:${col};background:linear-gradient(180deg,${col},${shade(col, .78)})">${lock ? '<svg><use href="#i-lock"/></svg>' : i}`
+      + (lock ? '' : `<span class="st">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>`) + `</button>`;
+  }
+  $('mapIn').style.height = H + 'px';
+  $('mapIn').innerHTML = `<svg class="path" viewBox="0 0 100 ${H}" preserveAspectRatio="none" style="width:100%;height:${H}px"><polyline points="${pts.join(' ')}" fill="none" stroke="rgba(170,150,255,.45)" stroke-width="5" stroke-dasharray="2 10" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>` + html;
+  const total = Object.values(save.adv.stars).reduce((a, b) => a + b, 0);
+  $('mapSub').innerHTML = `<svg><use href="#i-star"/></svg> ${total} / ${LEVELS_N * 3} stars · tap a level`;
+  screen = 'map'; show('map');
+  const wrap = $('mapWrap'); wrap.scrollTop = Math.max(0, (LEVELS_N - top) * 80 + 46 - wrap.clientHeight / 2);
+}
+
 /* ================= Game state ================= */
 let G = null, screen = 'menu', rng = Math.random, gamesSinceAd = 0;
-function newGame(daily = false){
-  rng = daily ? mulberry32((dailyNumber() * 2246822519) >>> 0) : Math.random;
+function newGame(daily = false, level = 0, movesOverride){
+  const def = level ? levelDef(level, movesOverride) : null;
+  rng = daily ? mulberry32((dailyNumber() * 2246822519) >>> 0) : def ? mulberry32(def.seed) : Math.random;
   G = { daily, grid: Array.from({ length: N }, () => Array(N).fill(null)), tray: [], score: 0, shown: 0, lines: 0, flushes: 0, combo: 0, bestCombo: 0,
         movesSinceClear: 0, revived: false, freeSwap: true, over: false, moves: 0, fx: [], parts: [], texts: [], shake: 0, flash: 0, banner: null, log: [],
-        freeze: 0, slow: 0, bump: 0, lastScore: 0, danger: 0, wasDanger: false, tip: null, hintT: 0 };
+        freeze: 0, slow: 0, bump: 0, lastScore: 0, danger: 0, wasDanger: false, tip: null, hintT: 0,
+        cnt: { colors: [0, 0, 0, 0], ice: 0, bomb: 0, bolt: 0 }, intro: 0,
+        adv: def ? { def, left: def.moves, hard: def.hard, spec: def.spec, specType: def.specType, cont: false, result: null } : null };
+  if (def) for (const t of def.pre) G.grid[t.r][t.c] = { color: t.color, special: null, ice: !!t.ice };
   refill();
 }
+// Flush levels deal a helping hand: a piece that finishes a nearly one-colour line, in its colour
+function flushAssist(){
+  const lines = [];
+  for (let i = 0; i < N; i++) for (const kind of ['r', 'c']){
+    const cells = []; for (let k = 0; k < N; k++) cells.push(kind === 'r' ? [i, k] : [k, i]);
+    const tiles = cells.map(([r, c]) => G.grid[r][c]), gaps = cells.filter((_, k) => !tiles[k]);
+    if (gaps.length < 1 || gaps.length > 2) continue;
+    const cols = new Set(tiles.filter(t => t && t.special !== 'prism').map(t => t.color)); if (cols.size !== 1) continue;
+    lines.push({ kind, gaps, color: [...cols][0] });
+  }
+  if (!lines.length) return null;
+  const L0 = lines[Math.floor(rng() * lines.length)], [g1, g2] = L0.gaps;
+  const adj = g2 && Math.abs(g1[0] - g2[0]) + Math.abs(g1[1] - g2[1]) === 1;
+  const shape = SHAPE_CELLS.find(x => adj ? (L0.kind === 'r' ? x.h === 1 && x.wd === 2 : x.h === 2 && x.wd === 1) : x.cells.length === 1);
+  return { cells: shape.cells, h: shape.h, w: shape.wd, color: L0.color, special: null };
+}
 function makePiece(){
+  if (G.adv && G.adv.def.goal.t === 'flush' && rng() < .2){ const a = flushAssist(); if (a) return a; }
   // bigger pieces show up more as your score climbs
-  const hard = clamp(G.score / 4000, 0, 1);
+  const hard = G.adv ? G.adv.hard : clamp(G.score / 4000, 0, 1);
   const wt = x => x.w * (x.cells.length >= 5 ? .25 + hard * .9 : 1);
   const tot = SHAPE_CELLS.reduce((a, x) => a + wt(x), 0);
   let r = rng() * tot, s = SHAPE_CELLS[0];
   for (const x of SHAPE_CELLS){ r -= wt(x); if (r <= 0){ s = x; break; } }
   const p = { cells: s.cells, h: s.h, w: s.wd, color: Math.floor(rng() * COLORS.length), special: null };
-  if (rng() < .1){ p.special = { i: Math.floor(rng() * s.cells.length), type: SPECIALS[Math.floor(rng() * SPECIALS.length)] }; }
+  if (rng() < (G.adv ? G.adv.spec : .1)){ p.special = { i: Math.floor(rng() * s.cells.length), type: G.adv && G.adv.specType ? (rng(), G.adv.specType) : SPECIALS[Math.floor(rng() * SPECIALS.length)] }; }
   return p;
 }
 function canPlace(p, r, c){
@@ -422,11 +754,15 @@ function place(i, r, c){
   if (!save.tip_drag) tipDone('drag');
   if (tutOn() && p.special && !save.tip_special){ G.tip = { text: { bomb: '💣 Bombs clear the tiles around them', bolt: '⚡ Lightning clears its whole row and column', prism: '🌈 Rainbow tiles count as any colour' }[p.special.type], life: 3.6 }; tipDone('special'); }
   G.tray[i] = null; G.moves++;
+  if (G.adv) G.adv.left--;
+  mStat('pieces', 1);
   G.score += p.cells.length;
   Sound.place();
   const cleared = resolve();
   if (G.tray.every(t => !t)) refill();
   afterMove(cleared);
+  if (!G.adv) mStat('bestGame', G.score, true);
+  if (G.adv && advCheck()) return true;
   if (!G.tray.some(t => t && fitsAnywhere(t))) gameOver();
   return true;
 }
@@ -453,7 +789,7 @@ function resolve(){
   while (queue.length){
     const k = queue.pop(); if (seen.has(k)) continue; seen.add(k);
     const r = Math.floor(k / N), c = k % N, t = G.grid[r][c]; if (!t || !t.special || t.special === 'prism') continue;
-    chain++;
+    chain++; G.cnt[t.special]++;
     const add = (rr, cc) => { if (rr >= 0 && cc >= 0 && rr < N && cc < N && G.grid[rr][cc] && !kill.has(key(rr, cc))){ kill.add(key(rr, cc)); queue.push(key(rr, cc)); } };
     if (t.special === 'bomb'){ for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) add(r + dr, c + dc); G.fx.push({ type: 'boom', r, c, life: .5 }); Sound.boom(); G.shake = Math.max(G.shake, 18); buzz(50); }
     if (t.special === 'bolt'){ for (let k2 = 0; k2 < N; k2++){ add(r, k2); add(k2, c); } G.fx.push({ type: 'bolt', r, c, life: .4 }); Sound.zap(); G.shake = Math.max(G.shake, 14); buzz(35); }
@@ -464,11 +800,13 @@ function resolve(){
   pts *= G.combo;
   if (flushes) pts *= 3;
   G.lines += lines; G.flushes += flushes;
+  mStat('lines', lines); mStat('flushes', flushes); mStat('combo', G.combo, true);
   for (const k of kill){
     const r = Math.floor(k / N), c = k % N, t = G.grid[r][c]; if (!t) continue;
     const along = full[0].kind === 'r' ? c : r;
     G.fx.push({ type: 'tile', r, c, color: t.color, life: .35, delay: along * .028 });
     burst(r, c, COLORS[t.color], flushes ? 7 : 4);
+    G.cnt.colors[t.color]++; if (t.ice){ G.cnt.ice++; burst(r, c, '#e6faff', 6); }
     G.grid[r][c] = null;
   }
   // an empty board is a perfect clear
@@ -497,6 +835,7 @@ function resolve(){
     for (const f of G.fx) if (f.type === 'flushLine' && !f.confetti){ f.confetti = 1; for (let k = 0; k < N; k++){ const rr2 = f.kind === 'r' ? f.i : k, cc2 = f.kind === 'r' ? k : f.i; burst(rr2, cc2, COLORS[(k + f.i) % COLORS.length], 5); } }
     if (G.banner) G.banner.big = 1;
   }
+  if (G.cnt.bomb || G.cnt.bolt){ const nb = G.cnt.bomb - (G.cntSeen ? G.cntSeen.bomb : 0), nl = G.cnt.bolt - (G.cntSeen ? G.cntSeen.bolt : 0); mStat('bombs', nb); mStat('bolts', nl); G.cntSeen = { bomb: G.cnt.bomb, bolt: G.cnt.bolt }; }
   return true;
 }
 // after each move: the nearly-full board gets a heartbeat and a short slow-down, once each time you get into trouble
@@ -517,6 +856,7 @@ function afterMove(cleared){
 }
 function gameOver(){
   if (G.over) return;
+  if (G.adv){ advEnd(false, 'No more room'); return; }
   G.over = true; Portal.gameplayStop(); G.slow = .9; G.endT = 0; buzz([40, 80, 120]);
   setTimeout(() => { if (G && G.over) showOver(); }, 900);
 }
@@ -658,7 +998,8 @@ function draw(dt){
   G.shown += (G.score - G.shown) * Math.min(1, realDt * 10); if (Math.abs(G.score - G.shown) < 1) G.shown = G.score;
   if (G.score !== G.lastScore){ G.bump = Math.min(1, .45 + (G.score - G.lastScore) / 300); G.lastScore = G.score; }
   G.bump = Math.max(0, G.bump - realDt * 4);
-  if (!COVER){
+  if (!COVER && G.adv) drawLevelHud();
+  else if (!COVER){
   { const sc = 1 + G.bump * .3, sy = by - Math.max(10, cs * .3) - 44; ctx.save(); ctx.translate(VW / 2, sy); ctx.scale(sc, sc);
     ctx.font = `900 ${Math.round(Math.min(56, VW / 8))}px ui-rounded,system-ui,sans-serif`; ctx.shadowColor = G.bump > .05 ? 'rgba(255,200,90,.9)' : 'rgba(160,140,255,.7)'; ctx.shadowBlur = 14; ctx.fillText(fmt(Math.round(G.shown)), 0, 0); ctx.restore(); ctx.shadowBlur = 0; }
   ctx.font = '900 15px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = '#c9c0ff';
@@ -687,6 +1028,7 @@ function draw(dt){
       ctx.save(); ctx.translate(bx + (c + .5) * cs, by + (r + 1) * cs); ctx.scale(sxk, syk);
       block(-cs / 2, -cs, cs, COLORS[t.color], t.special); ctx.restore();
     } else block(bx + c * cs, by + r * cs, cs, COLORS[t.color], t.special);
+    if (t.ice) iceOver(bx + c * cs, by + r * cs, cs);
     if (lit){ ctx.fillStyle = 'rgba(255,255,255,.28)'; rr(bx + c * cs + 3, by + r * cs + 3, cs - 6, cs - 6, cs * .16); ctx.fill(); }
   }
   if (tgt && tgt.ok){
@@ -752,8 +1094,48 @@ function draw(dt){
     vg.addColorStop(0, 'rgba(255,40,90,0)'); vg.addColorStop(1, `rgba(255,40,90,${G.danger * (.16 + pulse * .14)})`); ctx.fillStyle = vg; ctx.fillRect(-20, -20, VW + 40, VH + 40); }
   if (G.over && !COVER){ G.endT = (G.endT || 0) + realDt; ctx.fillStyle = `rgba(8,5,30,${Math.min(.45, G.endT * .6)})`; ctx.fillRect(-20, -20, VW + 40, VH + 40); }
   if (!COVER) drawTutorial(realDt);
+  if (!COVER && G.adv && G.intro > 0) drawIntro(realDt);
   G.shake *= Math.pow(.002, realDt);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+// the adventure header: moves left, the goal's progress, the level number
+function drawLevelHud(){
+  const { bx, by, cs, size } = L, a = G.adv, g = a.def.goal, fr = Math.max(10, cs * .3), y0 = by - fr - 44;
+  const prog = Math.min(advProg(), g.n), done = prog >= g.n;
+  ctx.save(); ctx.translate(VW / 2, y0); const sc = 1 + G.bump * .22; ctx.scale(sc, sc);
+  ctx.font = `900 ${Math.round(Math.min(50, VW / 8.5))}px ui-rounded,system-ui,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = done ? 'rgba(120,255,150,.9)' : 'rgba(160,140,255,.7)'; ctx.shadowBlur = 14; ctx.fillStyle = done ? '#8bff9e' : '#fff';
+  ctx.fillText(g.t === 'score' ? fmt(G.score) : `${prog}/${g.n}`, 0, 0); ctx.restore(); ctx.shadowBlur = 0;
+  ctx.font = '900 14px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = g.t === 'color' ? COLORS[g.c] : '#c9c0ff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(GOAL_SHORT(g), VW / 2, by - fr - 12);
+  const box = (x, label, val, col, warn) => {
+    const w = 64, h = 58, y = y0 - 22;
+    rr(x - w / 2, y, w, h, 15); ctx.fillStyle = 'rgba(16,12,52,.88)'; ctx.fill();
+    ctx.save(); ctx.shadowColor = col; ctx.shadowBlur = warn ? 14 + Math.sin(performance.now() / 120) * 8 : 8; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+    ctx.fillStyle = warn ? col : '#fff'; ctx.font = '900 25px ui-rounded,system-ui,sans-serif'; ctx.fillText(val, x, y + 24);
+    ctx.fillStyle = col; ctx.font = '900 10.5px ui-rounded,system-ui,sans-serif'; ctx.fillText(label, x, y + 47);
+  };
+  box(bx + 32, 'MOVES', String(a.left), a.left <= 3 ? '#ff4d8a' : '#ffc23d', a.left <= 3);
+  box(bx + size - 32, 'LEVEL', String(a.def.n), '#3fd0ff', false);
+}
+// ice: a frosty cap on a starting tile; clearing the tile breaks it
+function iceOver(x, y, s){
+  rr(x + s * .07, y + s * .07, s * .86, s * .86, s * .17); ctx.fillStyle = 'rgba(225,248,255,.55)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 1.5; ctx.beginPath();
+  ctx.moveTo(x + s * .28, y + s * .24); ctx.lineTo(x + s * .5, y + s * .5); ctx.lineTo(x + s * .4, y + s * .78);
+  ctx.moveTo(x + s * .5, y + s * .5); ctx.lineTo(x + s * .78, y + s * .42); ctx.stroke();
+}
+// "LEVEL 7 · Clear 10 lines" over the board for the first two seconds; you can already play
+function drawIntro(dt){
+  const { by, size } = L; G.intro -= dt; const a = clamp(G.intro, 0, 1) * clamp((2.4 - G.intro) * 5, 0, 1);
+  const w = Math.min(VW - 40, 330), h = 100, y = by + size / 2 - h / 2;
+  ctx.globalAlpha = a; rr(VW / 2 - w / 2, y, w, h, 24); ctx.fillStyle = 'rgba(16,12,52,.9)'; ctx.fill();
+  ctx.save(); ctx.shadowColor = 'rgba(150,110,255,.9)'; ctx.shadowBlur = 18; ctx.strokeStyle = '#a07cff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = '900 30px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = '#ffc23d'; ctx.fillText(`LEVEL ${G.adv.def.n}`, VW / 2, y + 34);
+  ctx.font = '800 18px ui-rounded,system-ui,sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(`${GOAL_TX(G.adv.def.goal)} in ${G.adv.def.moves} moves`, VW / 2, y + 70, w - 24);
+  ctx.globalAlpha = 1;
 }
 // first game: a hand drags the first tray piece onto the board until you place something; then short tips
 function drawTutorial(dt){
@@ -816,7 +1198,7 @@ cvs.addEventListener('pointerup', endDrag); cvs.addEventListener('pointercancel'
 
 /* ================= Screens ================= */
 function show(id){
-  for (const s of ['menu', 'over', 'skins']) $(s).classList.toggle('on', s === id);
+  for (const s of ['menu', 'over', 'skins', 'map', 'lvend']) $(s).classList.toggle('on', s === id);
   $('bar').classList.toggle('on', id === null);
   refreshSwap();
 }
@@ -834,6 +1216,9 @@ function refreshMenu(){
   $('dSubM').textContent = d ? 'Today: ' + fmt(d.score) + ' · play again to beat it' : 'Same pieces for everyone today';
   $('muteTx').textContent = 'Sound: ' + (save.muted ? 'off' : 'on');
   $('muteIco').setAttribute('href', save.muted ? '#i-mute' : '#i-sound');
+  const stars = Object.values(save.adv.stars).reduce((a, b) => a + b, 0);
+  $('advSub').textContent = save.adv.top > 1 || stars ? `Level ${save.adv.top} · ${stars} ★` : '100 levels with goals';
+  renderMissions('mList', false);
 }
 function startGame(daily = false, quiet = false){ if (!quiet) Sound.init(); newGame(daily); screen = 'play'; show(null); Portal.gameplayStart(); }
 function gemsFor(){ return Math.floor(G.score / 150) + G.flushes * 2; }
@@ -843,6 +1228,7 @@ function showOver(){
   save.gems += gems;
   const best = G.score > save.best; if (best) save.best = G.score;
   save.games++;
+  mStat('games', 1); mStat('bestGame', G.score, true); if (G.daily) mStat('dailyPlays', 1);
   if (G.daily){
     const k = dayKey(), prev = save.daily[k];
     if (!prev){ const y = dayKey(new Date(Date.now() - 864e5)); save.streak = save.lastDaily === y ? save.streak + 1 : 1; save.lastDaily = k; }
@@ -856,6 +1242,7 @@ function showOver(){
   $('oGems').innerHTML = `<span>+${gems} <svg><use href="#i-gem"/></svg> gems</span>`;
   $('reviveBtn').style.display = G.revived ? 'none' : 'flex';
   $('shareBtn').style.display = G.daily ? 'flex' : 'none';
+  renderMissions('oMis', true);
   show('over');
 }
 // revive: every tile of your most common colour bursts
@@ -863,11 +1250,7 @@ async function revive(){
   if (!G || G.revived || !G.over) return;
   if (!(await Portal.rewarded())) return;
   G.revived = true; G.over = false;
-  const counts = Array(COLORS.length).fill(0); G.grid.forEach(row => row.forEach(t => { if (t) counts[t.color]++; }));
-  const col = counts.indexOf(Math.max(...counts));
-  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++){ const t = G.grid[r][c]; if (t && t.color === col){ G.fx.push({ type: 'tile', r, c, color: col, life: .5 }); burst(r, c, COLORS[col], 6); G.grid[r][c] = null; } }
-  G.banner = { text: 'PRISM BLAST!', life: 1.5, c: COLORS[col] }; Sound.flush(); G.flash = .5;
-  if (!G.tray.some(t => t && fitsAnywhere(t))) refill();
+  prismBlast();
   screen = 'play'; show(null); Portal.gameplayStart();
 }
 async function swap(){
@@ -907,6 +1290,13 @@ function renderSkins(){
 function toMenu(){ G = null; screen = 'menu'; refreshMenu(); show('menu'); Portal.gameplayStop(); }
 
 $('playBtn').onclick = () => startGame(false);
+$('advBtn').onclick = openMap;
+$('mapBack').onclick = toMenu;
+$('mapIn').onclick = e => { const b = e.target.closest('.node'); if (!b || b.classList.contains('lock')) return; startLevel(+b.dataset.l); };
+$('leNext').onclick = async () => { const a = G && G.adv; if (!a) return toMenu(); const n = a.def.n, win = a.result && a.result.win; await betweenGamesAd(); if (win && n >= LEVELS_N) openMap(); else startLevel(win ? n + 1 : n); };
+$('leRetry').onclick = async () => { const n = G && G.adv ? G.adv.def.n : 1; await betweenGamesAd(); startLevel(n); };
+$('leMap').onclick = openMap;
+$('leCont').onclick = advContinue;
 $('dailyBtn').onclick = () => startGame(true);
 $('skinsBtn').onclick = () => { skinsFrom = 'menu'; renderSkins(); show('skins'); };
 $('oSkinsBtn').onclick = () => { skinsFrom = 'over'; renderSkins(); show('skins'); };
@@ -924,8 +1314,9 @@ let last = performance.now();
 function frame(t){
   requestAnimationFrame(frame);                 // schedule first, so one bad frame can never freeze the game
   const dt = Math.max(0, Math.min((t - last) / 1000, 1 / 20)); last = t;   // never negative
-  try { draw(dt); } catch(err){ drag = null; ctx.setTransform(1, 0, 0, 1, 0, 0); }
+  try { draw(dt); } catch(err){ drag = null; ctx.setTransform(1, 0, 0, 1, 0, 0); if (!frame.logged){ frame.logged = 1; console.error('Prism Pop frame error', err); } }
 }
+if (!COVER) dailyBonus();
 refreshMenu(); requestAnimationFrame(frame);
 // sound wakes on the first touch or key (browsers only allow audio after one)
 addEventListener('pointerdown', () => Sound.init(), { capture: true });
@@ -935,6 +1326,7 @@ if (!/[?&](debug|cover|menu)\b/.test(location.search)) startGame(false, true);
 
 if (/[?&]debug\b/.test(location.search)) window.__pp = {
   get G(){ return G; }, newGame, place, canPlace, fitsAnywhere, wouldClear, get screen(){ return screen; }, set screen(v){ screen = v; }, save, show, refill, draw, layout: L,
+  startLevel, levelDef, LEVELS_N, advProg, advCheck, openMap, showLevelEnd, missionsToday, MISSIONS, mStat, renderMissions, refreshMenu, popMsg, MOVES,
 };
 })();
 </script>

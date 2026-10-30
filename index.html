@@ -812,7 +812,7 @@ function resolve(){
   // an empty board is a perfect clear
   if (G.grid.every(row => row.every(x => !x))){ pts += 300 * G.combo; G.banner = { text: 'PERFECT!', life: 1.6, c: '#ffd166' }; Sound.perfect(); G.flash = .6; }
   else if (flushes){ G.banner = { text: flushes > 1 ? `FLUSH ×${flushes}!` : 'FLUSH!', life: 1.3, c: '#c77dff' }; Sound.flush(); G.flash = .35; }
-  else if (G.combo >= 2) G.banner = { text: `COMBO ×${G.combo}`, life: 1.1, c: '#80ed99' };
+  // combos get their own growing pop-up next to the cleared line (below), not a second banner
   else if (lines >= 2) G.banner = { text: lines >= 3 ? 'AMAZING!' : 'GREAT!', life: 1, c: '#4cc9f0' };
   Sound.clear(lines, G.combo);
   G.shake = Math.max(G.shake, 3 + lines * 3);

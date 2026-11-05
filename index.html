@@ -23,6 +23,7 @@
   svg{display:block}
   #sprite{position:absolute;width:0;height:0;overflow:hidden}
 
+  body.loading .screen,body.loading #bar{display:none!important}
   .screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(6,4,22,.25);z-index:3;overflow-y:auto}
   .screen.on{display:flex}
   #over{background:rgba(6,4,22,.4);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
@@ -300,6 +301,24 @@ const Portal = (() => {
     document.head.appendChild(s);
   });
 
+  // Saved progress. On CrazyGames it must go through their Data Module: it syncs to the player's
+  // account across devices, and their docs require games to rely on it there instead of local saves.
+  // Everywhere else it is plain localStorage. Neither function ever throws.
+  function localGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+  function localSet(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+  // resolves with the stored string (or null); on the portal it waits for the SDK to finish loading the player's data
+  function loadSave(key){
+    if (!onPortal) return Promise.resolve(localGet(key));
+    return ready.then(() => {
+      if (sdk && sdk.data){ try { return sdk.data.getItem(key); } catch(e){} }
+      return localGet(key);                 // SDK blocked (ad blocker): keep progress on this device
+    });
+  }
+  function writeSave(key, value){
+    if (sdk && sdk.data){ try { sdk.data.setItem(key, value); return; } catch(e){} }
+    localSet(key, value);
+  }
+
   function placeholder(){
     return new Promise(res => {
       adPlaying = true; applyAudio();
@@ -336,6 +355,7 @@ const Portal = (() => {
     interstitial: () => requestAd('midgame'),
     gameplayStart, gameplayStop,
     happytime(){ if (sdk) try { sdk.game.happytime(); } catch(e){} },
+    loadSave, writeSave,
   };
 })();
 
@@ -352,11 +372,14 @@ const fmt = n => n.toLocaleString('en-US');
 
 /* ================= Save ================= */
 const SAVE_KEY = 'prismpop.v1';
+const parseSave = str => { try { const v = JSON.parse(str); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch(e){ return {}; } };
+let saveLoaded = !Portal.onPortal;
 const save = Object.assign({ best: 0, gems: 0, owned: ['glossy'], skin: 'glossy', muted: false, daily: {}, streak: 0, lastDaily: '', games: 0 },
-  (() => { try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch(e){ return {}; } })());
-function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e){} }
+  saveLoaded ? parseSave((() => { try { return localStorage.getItem(SAVE_KEY); } catch(e){ return null; } })()) : {});
+// nothing is written until the player's real save has loaded, so the defaults can never overwrite it
+function persist(){ if (saveLoaded) Portal.writeSave(SAVE_KEY, JSON.stringify(save)); }
 // a damaged or odd-shaped save must never stop the game loading: put back anything of the wrong type
-(() => {
+function repairSave(){
   const obj = v => v && typeof v === 'object' && !Array.isArray(v), num = v => typeof v === 'number' && isFinite(v);
   for (const k of ['best', 'gems', 'streak', 'games']) if (!num(save[k]) || save[k] < 0) save[k] = 0;
   if (!Array.isArray(save.owned)) save.owned = ['glossy']; if (!save.owned.includes('glossy')) save.owned.push('glossy');
@@ -370,7 +393,8 @@ function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); 
   for (const k in save.adv.stars) if (!num(save.adv.stars[k])) delete save.adv.stars[k];
   if (save.mis !== undefined && !(obj(save.mis) && Array.isArray(save.mis.ids) && Array.isArray(save.mis.done) && obj(save.mis.prog))) delete save.mis;
   if (save.login !== undefined && !obj(save.login)) delete save.login;
-})();
+}
+repairSave();
 
 /* ================= Sound ================= */
 const Sound = (() => {
@@ -444,7 +468,8 @@ const SKINS = [
 // a short phone buzz, only once the player has touched the page (browsers block it otherwise)
 const buzz = ms => { try { if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(ms); } catch(e){} };
 // first-time players get a few hints; anyone who has played before is treated as returning
-if (save.tut === undefined){ save.tut = (save.games || save.best) ? 'done' : 'new'; persist(); }
+function initTut(){ if (save.tut === undefined){ save.tut = (save.games || save.best) ? 'done' : 'new'; persist(); } }
+if (saveLoaded) initTut();
 const tutOn = () => save.tut === 'new';
 function tipDone(k){ save['tip_' + k] = 1; if (save.tip_drag && save.tip_special && save.tip_flush) save.tut = 'done'; persist(); }
 
@@ -1357,13 +1382,26 @@ function frame(t){
   const dt = Math.max(0, Math.min((t - last) / 1000, 1 / 20)); last = t;   // never negative
   try { draw(dt); } catch(err){ drag = null; ctx.setTransform(1, 0, 0, 1, 0, 0); if (!frame.logged){ frame.logged = 1; console.error('Prism Pop frame error', err); } }
 }
-if (!COVER) dailyBonus();
-refreshMenu(); requestAnimationFrame(frame);
+function boot(){
+  document.body.classList.remove('loading');
+  if (!COVER) dailyBonus();
+  refreshMenu();
+  // land straight in a game. ?menu opens the menu instead (and the capture tools' ?debug / ?cover keep the old start)
+  if (!/[?&](debug|cover|menu)\b/.test(location.search)) startGame(false, true);
+}
+requestAnimationFrame(frame);
 // sound wakes on the first touch or key (browsers only allow audio after one)
 addEventListener('pointerdown', () => Sound.init(), { capture: true });
 addEventListener('keydown', () => Sound.init(), { capture: true });
-// land straight in a game. ?menu opens the menu instead (and the capture tools' ?debug / ?cover keep the old start)
-if (!/[?&](debug|cover|menu)\b/.test(location.search)) startGame(false, true);
+if (saveLoaded) boot();
+else {
+  // on CrazyGames: wait (about a second) for the SDK to load the player's save, then start
+  document.body.classList.add('loading');
+  Portal.loadSave(SAVE_KEY).then(str => {
+    Object.assign(save, parseSave(str)); repairSave(); saveLoaded = true;
+    Sound.setMuted(save.muted); initTut(); boot();
+  });
+}
 
 if (/[?&]debug\b/.test(location.search)) window.__pp = {
   get G(){ return G; }, newGame, place, canPlace, fitsAnywhere, wouldClear, get screen(){ return screen; }, set screen(v){ screen = v; }, save, show, refill, draw, layout: L,
